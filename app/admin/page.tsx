@@ -63,6 +63,8 @@ export default function HomeAdminPage() {
             src="/clubplay.png"
             alt="Club Padel y Fútbol"
             className="w-full h-full object-cover"
+            width="100"
+            height="100"
           />
         </div>
       </section>

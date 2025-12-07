@@ -1,5 +1,6 @@
 "use client";
 
+import { signUp } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,8 +146,7 @@ export default function RegisterPage() {
 
             <form
               className="space-y-4"
-              action="#"
-              method="POST"
+              action={signUp}
               aria-describedby="register-status"
               noValidate
             >

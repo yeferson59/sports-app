@@ -1,5 +1,6 @@
 "use client";
 
+import { signIn } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
@@ -140,8 +141,7 @@ export default function LoginPage() {
 
             <form
               className="space-y-4"
-              action="#"
-              method="POST"
+              action={signIn}
               aria-describedby="auth-status"
               noValidate
             >
@@ -184,12 +184,12 @@ export default function LoginPage() {
               <div className="flex items-center justify-between text-sm text-slate-300">
                 <label
                   className="inline-flex items-center gap-2"
-                  htmlFor="remember"
+                  htmlFor="rememberMe"
                 >
                   <input
-                    id="remember"
+                    id="rememberMe"
                     type="checkbox"
-                    name="remember"
+                    name="rememberMe"
                     className="w-4 h-4 rounded border-white/20 bg-white/3 accent-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300"
                   />
                   <span>Mantener sesión</span>
