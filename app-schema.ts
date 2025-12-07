@@ -39,9 +39,13 @@ export const timeslot = pgTable(
   "timeslot",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    fieldId: uuid("field_id").references(() => field.id),
-    userId: text("user_id").references(() => user.id),
-    dayOfWeek: weekday("day_of_week"),
+    fieldId: uuid("field_id")
+      .notNull()
+      .references(() => field.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    dayOfWeek: weekday("day_of_week").notNull(),
     startTime: text("start_time").notNull(),
     endTime: text("end_time").notNull(),
     isActive: boolean("is_active").default(true).notNull(),
@@ -65,7 +69,9 @@ export const price = pgTable(
     fieldId: uuid("field_id")
       .notNull()
       .references(() => field.id),
-    timeslotId: uuid("timeslot_id").references(() => timeslot.id),
+    timeslotId: uuid("timeslot_id")
+      .notNull()
+      .references(() => timeslot.id),
     priceAmount: numeric("price_amount").notNull(),
     currency: text("currency").default("ARS").notNull(),
     validFrom: timestamp("valid_from"),
@@ -114,6 +120,11 @@ export const booking = pgTable(
     index("booking_field_idx").on(b.fieldId),
     index("booking_user_idx").on(b.userId),
     index("booking_timeslot_idx").on(b.timeslotId),
+    index("booking_instructor_time_idx").on(
+      b.instructorId,
+      b.startTime,
+      b.endTime,
+    ),
   ],
 );
 
@@ -132,15 +143,24 @@ export const timeslotRelations = relations(timeslot, ({ one, many }) => ({
 
 export const priceRelations = relations(price, ({ one, many }) => ({
   field: one(field, { fields: [price.fieldId], references: [field.id] }),
-  timeslot: one(timeslot, { fields: [price.timeslotId], references: [timeslot.id] }),
+  timeslot: one(timeslot, {
+    fields: [price.timeslotId],
+    references: [timeslot.id],
+  }),
   bookings: many(booking),
 }));
 
 export const bookingRelations = relations(booking, ({ one }) => ({
   field: one(field, { fields: [booking.fieldId], references: [field.id] }),
   user: one(user, { fields: [booking.userId], references: [user.id] }),
-  instructor: one(user, { fields: [booking.instructorId], references: [user.id] }),
-  timeslot: one(timeslot, { fields: [booking.timeslotId], references: [timeslot.id] }),
+  instructor: one(user, {
+    fields: [booking.instructorId],
+    references: [user.id],
+  }),
+  timeslot: one(timeslot, {
+    fields: [booking.timeslotId],
+    references: [timeslot.id],
+  }),
   price: one(price, { fields: [booking.priceId], references: [price.id] }),
 }));
 

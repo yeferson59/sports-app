@@ -91,16 +91,17 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const userRoleRelations = relations(user, ({ one }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
   role: one(role, {
     fields: [user.roleId],
     references: [role.id],
   }),
-}));
-
-export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+}));
+
+export const roleRelations = relations(role, ({ many }) => ({
+  users: many(user),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
