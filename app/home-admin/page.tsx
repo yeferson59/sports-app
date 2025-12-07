@@ -20,13 +20,16 @@ export default function HomeAdminPage() {
             Registrar instructor
           </button>
         </Link>
-        <button
-          className="bg-gradient-to-r from-emerald-400 to-cyan-400 
-          px-4 py-2 rounded-lg text-slate-900 font-semibold shadow 
-          hover:brightness-105 transition"
-        >
-          Registrar horario canchas
-        </button>
+        <Link href="/registrar-horario-cancha">
+          <button
+            className="bg-gradient-to-r from-emerald-400 to-cyan-400 
+            px-4 py-2 rounded-lg text-slate-900 font-semibold shadow 
+            hover:brightness-105 transition"
+          >
+            Registrar horario canchas
+          </button>
+        </Link>
+        
         <button
           className="bg-gradient-to-r from-emerald-400 to-cyan-400 
           px-4 py-2 rounded-lg text-slate-900 font-semibold shadow 
