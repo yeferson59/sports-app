@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 flex items-center justify-center p-6">
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 flex items-center justify-center p-6">
       {/* Accessible status region (for future async feedback) */}
       <div aria-live="polite" className="sr-only" id="auth-status" />
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
         {/* Left - Brand / Illustration */}
         <aside className="hidden md:flex flex-col justify-center rounded-2xl p-8 bg-white/5 backdrop-blur-sm ring-1 ring-white/10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex items-center justify-center w-14 h-14 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 shadow-md">
+            <div className="flex items-center justify-center w-14 h-14 rounded-lg bg-linear-to-br from-emerald-400 to-cyan-400 shadow-md">
               {/* Combined sports icon: football + padel racket (decorative) */}
               <svg
                 viewBox="0 0 64 64"
@@ -205,7 +205,7 @@ export default function LoginPage() {
                 type="submit"
                 aria-label="Entrar en ClubPlay"
                 // Use shadcn Button defaults but override visual appearance for brand gradient
-                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 focus-visible:translate-y-0.5 motion-safe:transition-transform motion-safe:duration-150 motion-reduce:transition-none"
+                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 focus-visible:translate-y-0.5 motion-safe:transition-transform motion-safe:duration-150 motion-reduce:transition-none"
               >
                 {/* Decorative svg icon inside button; non-interactive for assistive tech */}
                 <svg

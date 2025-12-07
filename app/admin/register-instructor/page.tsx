@@ -1,17 +1,19 @@
 "use client";
 
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function RegisterInstructorPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 flex items-center justify-center p-6">
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 flex items-center justify-center p-6">
       <div id="register-status" aria-live="polite" className="sr-only" />
 
       {/* Background SVGs */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 overflow-hidden"
+      >
         <svg
           className="absolute -right-16 -top-16 opacity-20 motion-safe:animate-pulse"
           width="600"
@@ -50,7 +52,7 @@ export default function RegisterInstructorPage() {
         {/* Left side */}
         <aside className="hidden md:flex flex-col justify-center rounded-2xl p-8 bg-white/5 backdrop-blur-sm ring-1 ring-white/10">
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-center justify-center w-14 h-14 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 shadow-md">
+            <div className="flex items-center justify-center w-14 h-14 rounded-lg bg-linear-to-br from-emerald-400 to-cyan-400 shadow-md">
               <svg
                 viewBox="0 0 64 64"
                 width="28"
@@ -77,17 +79,15 @@ export default function RegisterInstructorPage() {
 
             <div>
               <h2 className="text-2xl font-semibold text-white">ClubPlay</h2>
-              <p className="text-sm text-slate-300">
-                Registro de instructores
-              </p>
+              <p className="text-sm text-slate-300">Registro de instructores</p>
             </div>
           </div>
 
           <div className="prose prose-invert text-slate-200">
             <h3 className="mt-2">Alta de instructores</h3>
             <p className="text-sm">
-              Registra nuevos profesores para las clases de pádel.
-              Podrás asignar horarios, campos y gestionar disponibilidad.
+              Registra nuevos profesores para las clases de pádel. Podrás
+              asignar horarios, campos y gestionar disponibilidad.
             </p>
           </div>
         </aside>
@@ -200,7 +200,7 @@ export default function RegisterInstructorPage() {
 
               <Button
                 type="submit"
-                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 active:scale-95"
+                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 active:scale-95"
               >
                 Registrar Instructor
               </Button>

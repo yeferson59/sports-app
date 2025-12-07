@@ -3,20 +3,18 @@
 import Image from "next/image";
 import { useState } from "react";
 
-
 type CanchaKey = "cancha1" | "cancha2" | "cancha3" | "cancha4";
 type FieldKey = "start" | "end";
 
-
 const cardClass = `
-  bg-slate-800/40 
-  rounded-xl 
-  border border-white/10 
-  shadow-xl 
+  bg-slate-800/40
+  rounded-xl
+  border border-white/10
+  shadow-xl
   backdrop-blur-sm
   p-6
-  flex flex-col 
-  items-center 
+  flex flex-col
+  items-center
   gap-4
 `;
 
@@ -45,18 +43,18 @@ export default function RegistrarHorarioCancha() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
-
       {/* HEADER */}
       <header
-        className="w-full bg-slate-800/50 border border-white/10 rounded-xl 
+        className="w-full bg-slate-800/50 border border-white/10 rounded-xl
           px-6 py-4 shadow-lg backdrop-blur-sm"
       >
-        <h1 className="text-2xl font-semibold">Registrar Horarios de Canchas</h1>
+        <h1 className="text-2xl font-semibold">
+          Registrar Horarios de Canchas
+        </h1>
       </header>
 
       {/* TARJETAS */}
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mt-10">
-
         {/* TARJETA GENERICA DE CANCHA */}
         {(["cancha1", "cancha2", "cancha3", "cancha4"] as CanchaKey[]).map(
           (canchaKey, index) => (
@@ -96,7 +94,7 @@ export default function RegistrarHorarioCancha() {
                 />
               </div>
             </div>
-          )
+          ),
         )}
       </section>
 
@@ -105,10 +103,10 @@ export default function RegistrarHorarioCancha() {
         <button
           onClick={handleSave}
           className="
-            bg-gradient-to-r from-emerald-400 to-cyan-400
-            px-8 py-3 rounded-xl 
-            text-slate-900 font-semibold 
-            shadow-lg hover:brightness-105 
+            bg-linear-to-r from-emerald-400 to-cyan-400
+            px-8 py-3 rounded-xl
+            text-slate-900 font-semibold
+            shadow-lg hover:brightness-105
             transition-all
           "
         >
