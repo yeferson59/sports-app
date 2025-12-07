@@ -9,7 +9,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const roleName = pgEnum("role_enum", ["client", "admin", "intructor"]);
+export const roleName = pgEnum("role_enum", ["client", "admin", "instructor"]);
 
 export const role = pgTable("role", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -90,6 +90,13 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+export const userRoleRelations = relations(user, ({ one }) => ({
+  role: one(role, {
+    fields: [user.roleId],
+    references: [role.id],
+  }),
+}));
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
