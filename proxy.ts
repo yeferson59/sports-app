@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
+import { getUserRole } from "./lib/user";
 
 // Rutas públicas - accesibles sin autenticación
 const PUBLIC_ROUTES = ["/login", "/register"];
@@ -11,20 +12,23 @@ const PROTECTED_ROUTES = ["/admin", "/dashboard", "/profile"];
 
 // Función para verificar si una ruta es pública
 function isPublicRoute(path: string): boolean {
-  return PUBLIC_ROUTES.some(route => path.startsWith(route));
+  return PUBLIC_ROUTES.some((route) => path.startsWith(route));
 }
 
 // Función para verificar si una ruta es protegida
 function isProtectedRoute(path: string): boolean {
-  return PROTECTED_ROUTES.some(route => path.startsWith(route));
+  return PROTECTED_ROUTES.some((route) => path.startsWith(route));
 }
 
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const session = !!(await auth.api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
-  }));
+  });
+
+  const roleName = await getUserRole(session?.user.id);
+  console.log(roleName);
 
   // Si el usuario no tiene sesión
   if (!session) {
