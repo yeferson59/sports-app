@@ -13,7 +13,7 @@ export const roleName = pgEnum("role_enum", ["client", "admin", "instructor"]);
 
 export const role = pgTable("role", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: roleName("name").notNull(),
+  name: roleName("name").unique().notNull(),
 });
 
 export const user = pgTable("user", {
