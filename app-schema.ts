@@ -39,12 +39,8 @@ export const timeslot = pgTable(
   "timeslot",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    fieldId: uuid("field_id")
-      .notNull()
-      .references(() => field.id),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id),
+    fieldId: uuid("field_id").references(() => field.id),
+    userId: text("user_id").references(() => user.id),
     dayOfWeek: weekday("day_of_week").notNull(),
     startTime: text("start_time").notNull(),
     endTime: text("end_time").notNull(),
@@ -73,7 +69,7 @@ export const price = pgTable(
       .notNull()
       .references(() => timeslot.id),
     priceAmount: numeric("price_amount").notNull(),
-    currency: text("currency").default("ARS").notNull(),
+    currency: text("currency").default("COP").notNull(),
     validFrom: timestamp("valid_from"),
     validTo: timestamp("valid_to"),
     isActive: boolean("is_active").default(true).notNull(),

@@ -1,4 +1,4 @@
-import { db, sql } from "../db";
+import { db, poolClient } from "../db";
 import { role } from "../auth-schema";
 
 const main = async () => {
@@ -9,12 +9,14 @@ const main = async () => {
   });
 
   // IMPORTANTE → cerrar conexión
-  await sql.end({ timeout: 5 });
+  await poolClient.end();
 };
 
-main().then(() => {
-  console.log("Roles insertados correctamente");
-}).catch((err) => {
-  console.error("Error en seed:", err);
-  sql.end({ timeout: 5 });
-});
+main()
+  .then(() => {
+    console.log("Roles insertados correctamente");
+  })
+  .catch((err) => {
+    console.error("Error en seed:", err);
+    poolClient.end();
+  });

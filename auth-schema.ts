@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -7,50 +7,15 @@ import {
   index,
   pgEnum,
   uuid,
+  char,
 } from "drizzle-orm/pg-core";
 
 export const roleName = pgEnum("role_enum", ["client", "admin", "instructor"]);
-
-// Enum para días de la semana
-export const weekdayEnum = pgEnum("weekday_enum", [
-  "monday",
-  "tuesday", 
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday"
-]);
 
 export const role = pgTable("role", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: roleName("name").unique().notNull(),
 });
-
-export const field = pgTable("field", {
-  id: uuid("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type").notNull(),
-  is_active: boolean("is_active").notNull().default(true),
-  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-// ========== TABLA TIMESLOT ==========
-export const timeslot = pgTable("timeslot", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  field_id: uuid("field_id")
-    .notNull()
-    .references(() => field.id, { onDelete: "cascade" }),
-  user_id: text("user_id").default(sql`NULL`),
-  day_of_week: weekdayEnum("day_of_week").notNull(),
-  start_time: text("start_time").notNull(),
-  end_time: text("end_time").notNull(),
-  is_active: boolean("is_active").notNull().default(true),
-  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-// ====================================
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -61,6 +26,7 @@ export const user = pgTable("user", {
   roleId: uuid("role_id")
     .notNull()
     .references(() => role.id),
+  numberPhone: char("number_phone", { length: 10 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -127,22 +93,6 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-// ========== RELACIONES ==========
-export const fieldRelations = relations(field, ({ many }) => ({
-  timeslots: many(timeslot),
-}));
-
-export const timeslotRelations = relations(timeslot, ({ one }) => ({
-  field: one(field, {
-    fields: [timeslot.field_id],
-    references: [field.id],
-  }),
-  user: one(user, {
-    fields: [timeslot.user_id],
-    references: [user.id],
-  }),
-}));
-
 export const userRelations = relations(user, ({ one, many }) => ({
   role: one(role, {
     fields: [user.roleId],
@@ -150,7 +100,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
   }),
   sessions: many(session),
   accounts: many(account),
-  timeslots: many(timeslot),
 }));
 
 export const roleRelations = relations(role, ({ many }) => ({
@@ -177,6 +126,4 @@ export const schemaAuth = {
   verification,
   account,
   session,
-  field,
-  timeslot,
 };

@@ -1,10 +1,17 @@
 "use server";
 
 import { db } from "@/db";
-import { timeslot, field } from "@/auth-schema";
+import { field } from "@/app-schema";
 import { eq, sql } from "drizzle-orm";
 
-type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+type DayOfWeek =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
 
 interface TimeSlotData {
   field_id: string;
@@ -20,10 +27,10 @@ export async function getActiveFields() {
     .select({
       id: field.id,
       name: field.name,
-      type: field.type,
+      type: field.typeField,
     })
     .from(field)
-    .where(eq(field.is_active, true));
+    .where(eq(field.isActive, true));
 
   return activeFields;
 }
@@ -36,8 +43,8 @@ export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
   }
 
   // Validar que todas las canchas existan
-  const fieldIds = [...new Set(timeSlots.map(ts => ts.field_id))];
-  
+  const fieldIds = [...new Set(timeSlots.map((ts) => ts.field_id))];
+
   for (const fieldId of fieldIds) {
     const existingField = await db
       .select({ id: field.id })
@@ -59,7 +66,7 @@ export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
     // Validar que la hora fin sea mayor que la hora inicio
     const start = new Date(`2000-01-01T${slot.start_time}`);
     const end = new Date(`2000-01-01T${slot.end_time}`);
-    
+
     if (end <= start) {
       throw new Error("La hora de fin debe ser mayor que la hora de inicio.");
     }
@@ -67,16 +74,16 @@ export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
 
   // Insertar usando SQL raw para evitar problemas con Drizzle
   const insertedSlots = [];
-  
+
   for (const slot of timeSlots) {
     const result = await db.execute(sql`
       INSERT INTO timeslot (
-        id, 
-        field_id, 
-        user_id, 
-        day_of_week, 
-        start_time, 
-        end_time, 
+        id,
+        field_id,
+        user_id,
+        day_of_week,
+        start_time,
+        end_time,
         is_active,
         created_at,
         updated_at
@@ -93,7 +100,7 @@ export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
       )
       RETURNING *
     `);
-    
+
     if (result && Array.isArray(result)) {
       insertedSlots.push(result[0]);
     }
