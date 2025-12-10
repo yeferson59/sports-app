@@ -20,17 +20,17 @@ export const getUserRole = async (id?: string) => {
   return roleName.name;
 };
 
-export const IsAdmin = async (id: string) => {
+export const isAdmin = async (id?: string) => {
   const role = await getUserRole(id);
   return role === "admin";
 };
 
-export const IsClient = async (id: string) => {
+export const isClient = async (id?: string) => {
   const role = await getUserRole(id);
   return role === "client";
 };
 
-export const IsInstructor = async (id: string) => {
+export const isInstructor = async (id?: string) => {
   const role = await getUserRole(id);
   return role === "instructor";
 };

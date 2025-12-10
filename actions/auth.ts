@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { role } from "@/auth-schema";
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.email(),
@@ -34,6 +35,8 @@ export const signIn = async (formData: FormData) => {
     },
     headers: header,
   });
+
+  redirect("/customer");
 };
 
 const signUpSchema = z.object({

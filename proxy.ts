@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { headers } from "next/headers";
-import { getUserRole } from "./lib/user";
+import { isClient, isInstructor, isAdmin } from "@/lib/user";
 
 // Rutas públicas - accesibles sin autenticación
 const PUBLIC_ROUTES = ["/login", "/register"];
 
 // Rutas protegidas - requieren autenticación
-const PROTECTED_ROUTES = ["/admin", "/dashboard", "/profile"];
+const PROTECTED_ROUTES = ["/admin", "/customer", "/instructor"];
 
 // Función para verificar si una ruta es pública
 function isPublicRoute(path: string): boolean {
@@ -27,24 +27,26 @@ export async function proxy(request: NextRequest) {
     headers: await headers(),
   });
 
-  const roleName = await getUserRole(session?.user.id);
-  console.log(roleName);
-
   // Si el usuario no tiene sesión
   if (!session) {
     // Si intenta acceder a una ruta protegida, redirige a login
     if (isProtectedRoute(path)) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    // Las rutas públicas son accesibles sin sesión
-    return NextResponse.next();
   }
 
   // Si el usuario tiene sesión
   if (session) {
-    // Si intenta acceder a rutas públicas, redirige a dashboard
-    if (isPublicRoute(path)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (path !== "/customer" && (await isClient(session.user.id))) {
+      return NextResponse.redirect(new URL("/customer", request.url));
+    }
+
+    if (path !== "/instructor" && (await isInstructor(session.user.id))) {
+      return NextResponse.redirect(new URL("/instructor", request.url));
+    }
+
+    if (path !== "/admin" && (await isAdmin(session.user.id))) {
+      return NextResponse.redirect(new URL("/admin", request.url));
     }
   }
 
