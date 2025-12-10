@@ -2,6 +2,9 @@
 
 import { signIn } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -145,11 +148,11 @@ export default function LoginPage() {
               aria-describedby="auth-status"
               noValidate
             >
-              <label htmlFor="email" className="block">
-                <span className="text-sm text-slate-300">
+              <div>
+                <Label htmlFor="email" required>
                   Correo electrónico
-                </span>
-                <input
+                </Label>
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -157,47 +160,48 @@ export default function LoginPage() {
                   autoComplete="email"
                   inputMode="email"
                   aria-required="true"
-                  className="mt-2 w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 transition-transform motion-safe:transform-gpu motion-safe:duration-150"
+                  className="mt-2"
                   placeholder="tucorreo@ejemplo.com"
                 />
-              </label>
+              </div>
 
-              <label htmlFor="password" className="block">
+              <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">Contraseña</span>
-                  <a href="#" className="text-emerald-300 hover:underline">
-                    ¿Olvidaste tu contraseña?
+                  <Label htmlFor="password" required>
+                    Contraseña
+                  </Label>
+                  <a
+                    href="#"
+                    className="text-sm text-emerald-300 hover:underline"
+                  >
+                    ¿Olvidaste?
                   </a>
                 </div>
-                <input
+                <Input
                   id="password"
                   name="password"
                   type="password"
                   required
                   autoComplete="current-password"
                   aria-required="true"
-                  className="mt-2 w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 transition-transform motion-safe:transform-gpu motion-safe:duration-150"
+                  className="mt-2"
                   placeholder="••••••••"
                 />
-              </label>
+              </div>
 
-              <div className="flex items-center justify-between text-sm text-slate-300">
+              <div className="flex items-center gap-3">
+                <Input
+                  id="rememberMe"
+                  type="checkbox"
+                  name="rememberMe"
+                  className="w-4 h-4"
+                />
                 <label
-                  className="inline-flex items-center gap-2"
+                  className="text-sm text-slate-300 cursor-pointer"
                   htmlFor="rememberMe"
                 >
-                  <input
-                    id="rememberMe"
-                    type="checkbox"
-                    name="rememberMe"
-                    className="w-4 h-4 rounded border-white/20 bg-white/3 accent-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300"
-                  />
-                  <span>Mantener sesión</span>
+                  Mantener sesión
                 </label>
-
-                <a href="#" className="text-emerald-300 hover:underline">
-                  Ayuda
-                </a>
               </div>
 
               {/* Primary action replaced with shadcn `Button` */}
@@ -300,9 +304,12 @@ export default function LoginPage() {
 
             <footer className="mt-6 text-center text-sm text-slate-400">
               ¿No tienes cuenta?{" "}
-              <a href="#" className="text-emerald-300 hover:underline">
+              <Link
+                href="/register"
+                className="text-emerald-300 hover:underline"
+              >
                 Regístrate
-              </a>
+              </Link>
             </footer>
           </div>
         </div>

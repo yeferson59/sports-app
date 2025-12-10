@@ -1,43 +1,35 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/user-menu";
+import { authClient } from "@/lib/auth-client";
 
 export default function HomeAdminPage() {
+  const { data: session, isPending } = authClient.useSession();
+
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
       {/* HEADER */}
       <header
-        className="w-full flex justify-between items-center
+        className="w-full flex flex-col sm:flex-row gap-4 justify-between items-center
         bg-slate-800/50 border border-white/10 rounded-xl
         px-6 py-4 shadow-lg backdrop-blur-sm"
       >
         <h1 className="text-2xl font-semibold">Panel Administrativo</h1>
 
-        <Link href="/register-instructor">
-          <button
-            className="bg-linear-to-r from-emerald-400 to-cyan-400
-            px-4 py-2 rounded-lg text-slate-900 font-semibold shadow
-            hover:brightness-105 transition"
-          >
-            Registrar instructor
-          </button>
-        </Link>
-        <Link href="/registrar-horario-cancha">
-          <button
-            className="bg-linear-to-r from-emerald-400 to-cyan-400
-            px-4 py-2 rounded-lg text-slate-900 font-semibold shadow
-            hover:brightness-105 transition"
-          >
-            Registrar horario canchas
-          </button>
-        </Link>
+        <div className="flex gap-3 flex-wrap items-center">
+          <Link href="/admin/register-instructor">
+            <Button variant="default">Registrar instructor</Button>
+          </Link>
+          <Link href="/admin/registrar-horario-cancha">
+            <Button variant="default">Registrar horarios</Button>
+          </Link>
+          <Button variant="destructive">Deshabilitar cancha</Button>
 
-        <button
-          className="bg-linear-to-r from-emerald-400 to-cyan-400
-          px-4 py-2 rounded-lg text-slate-900 font-semibold shadow
-          hover:brightness-105 transition"
-        >
-          Deshabilitar cancha
-        </button>
+          {!isPending && session && <UserMenu user={session.user} />}
+        </div>
       </header>
 
       {/* CONTENIDO */}
@@ -51,7 +43,7 @@ export default function HomeAdminPage() {
 
           <p className="text-slate-300 leading-relaxed">
             Aquí podrás registrar instructores, horarios de las canchas y
-            deshabilitar cancha.
+            deshabilitar canchas.
           </p>
         </div>
       </section>
@@ -63,8 +55,8 @@ export default function HomeAdminPage() {
             src="/clubplay.png"
             alt="Club Padel y Fútbol"
             className="w-full h-full object-cover"
-            width="100"
-            height="100"
+            width="2816"
+            height="1536"
           />
         </div>
       </section>

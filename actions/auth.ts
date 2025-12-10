@@ -78,3 +78,13 @@ export const signUp = async (formData: FormData) => {
     headers: header,
   });
 };
+
+export const logout = async () => {
+  const header = await headers();
+  await auth.api.signOut({
+    headers: header,
+  });
+
+  redirect("/login");
+};
+

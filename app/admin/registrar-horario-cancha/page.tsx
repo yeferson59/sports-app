@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { AdminHeader } from "@/components/admin-header";
 
 type CanchaKey = "cancha1" | "cancha2" | "cancha3" | "cancha4";
 type FieldKey = "start" | "end";
@@ -28,7 +32,6 @@ export default function RegistrarHorarioCancha() {
     cancha4: { start: "", end: "" },
   });
 
-  // Aquí luego tengo que conectar con la base de datos
   const handleSave = () => {
     console.log("Horarios guardados:", horarios);
     alert("Horarios guardados correctamente ");
@@ -44,14 +47,7 @@ export default function RegistrarHorarioCancha() {
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
       {/* HEADER */}
-      <header
-        className="w-full bg-slate-800/50 border border-white/10 rounded-xl
-          px-6 py-4 shadow-lg backdrop-blur-sm"
-      >
-        <h1 className="text-2xl font-semibold">
-          Registrar Horarios de Canchas
-        </h1>
-      </header>
+      <AdminHeader title="Registrar Horarios de Canchas" />
 
       {/* TARJETAS */}
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mt-10">
@@ -59,7 +55,7 @@ export default function RegistrarHorarioCancha() {
         {(["cancha1", "cancha2", "cancha3", "cancha4"] as CanchaKey[]).map(
           (canchaKey, index) => (
             <div key={canchaKey} className={cardClass}>
-              <h2 className="text-xl font-semibold mb-4">Cancha</h2>
+              <h2 className="text-xl font-semibold mb-4">Cancha {index + 1}</h2>
               <Image
                 src={`/cancha${index + 1}.png`}
                 width={260}
@@ -70,27 +66,33 @@ export default function RegistrarHorarioCancha() {
 
               {/* Hora inicio */}
               <div className="w-full flex flex-col gap-2">
-                <label className="text-sm text-slate-300">Hora inicio</label>
-                <input
+                <Label htmlFor={`start-${canchaKey}`} required>
+                  Hora inicio
+                </Label>
+                <Input
+                  id={`start-${canchaKey}`}
                   type="time"
-                  className="bg-slate-700 p-2 rounded border border-white/10"
                   value={horarios[canchaKey].start}
                   onChange={(e) =>
                     handleChange(canchaKey, "start", e.target.value)
                   }
+                  className="mt-2"
                 />
               </div>
 
               {/* Hora fin */}
               <div className="w-full flex flex-col gap-2">
-                <label className="text-sm text-slate-300">Hora fin</label>
-                <input
+                <Label htmlFor={`end-${canchaKey}`} required>
+                  Hora fin
+                </Label>
+                <Input
+                  id={`end-${canchaKey}`}
                   type="time"
-                  className="bg-slate-700 p-2 rounded border border-white/10"
                   value={horarios[canchaKey].end}
                   onChange={(e) =>
                     handleChange(canchaKey, "end", e.target.value)
                   }
+                  className="mt-2"
                 />
               </div>
             </div>
@@ -100,18 +102,9 @@ export default function RegistrarHorarioCancha() {
 
       {/* BOTÓN GUARDAR */}
       <div className="mt-12 flex justify-center">
-        <button
-          onClick={handleSave}
-          className="
-            bg-linear-to-r from-emerald-400 to-cyan-400
-            px-8 py-3 rounded-xl
-            text-slate-900 font-semibold
-            shadow-lg hover:brightness-105
-            transition-all
-          "
-        >
+        <Button onClick={handleSave} size="lg">
           Guardar horarios
-        </button>
+        </Button>
       </div>
     </div>
   );

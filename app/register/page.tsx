@@ -4,6 +4,7 @@ import { signUp } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function RegisterPage() {
   return (
@@ -139,8 +140,7 @@ export default function RegisterPage() {
                 Crear cuenta
               </h1>
               <p className="mt-2 text-sm text-slate-300">
-                Regístrate como cliente para reservar o como administrador para
-                gestionar canchas.
+                Regístrate para reservar canchas y gestionar tus horarios.
               </p>
             </header>
 
@@ -181,7 +181,9 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email" required>
+                  Correo electrónico
+                </Label>
                 <Input
                   id="email"
                   name="email"
@@ -195,22 +197,11 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="phone">Teléfono (opcional)</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="+54 9 11 1234 5678"
-                  className="mt-2"
-                />
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password" required>
+                    Contraseña
+                  </Label>
                   <Input
                     id="password"
                     name="password"
@@ -224,7 +215,9 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                  <Label htmlFor="confirmPassword" required>
+                    Confirmar contraseña
+                  </Label>
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -238,37 +231,23 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="role">Registrarme como</Label>
-                <select
-                  id="role"
-                  name="role"
-                  defaultValue="client"
-                  className="mt-2 w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 transition-shadow motion-safe:duration-150"
-                  aria-label="Tipo de cuenta"
-                >
-                  <option value="client">Cliente</option>
-                  <option value="owner">Administrador de cancha</option>
-                </select>
-              </div>
-
               <div className="flex items-start gap-3">
-                <input
+                <Input
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="mt-1 w-4 h-4 rounded border-white/20 bg-white/3 accent-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300"
+                  className="mt-1 w-4 h-4"
                   aria-required="true"
                 />
-                <Label
+                <label
                   htmlFor="terms"
-                  className="inline-flex! items-center! gap-2! text-sm! text-slate-300!"
+                  className="text-sm text-slate-300 cursor-pointer"
                 >
                   Acepto los{" "}
                   <a href="#" className="text-emerald-300 hover:underline">
                     términos y condiciones
                   </a>
-                </Label>
+                </label>
               </div>
 
               {/* Primary action uses shadcn Button with microinteraction classes */}
@@ -368,9 +347,9 @@ export default function RegisterPage() {
 
             <footer className="mt-6 text-center text-sm text-slate-400">
               ¿Ya tienes cuenta?{" "}
-              <a href="/login" className="text-emerald-300 hover:underline">
+              <Link href="/login" className="text-emerald-300 hover:underline">
                 Inicia sesión
-              </a>
+              </Link>
             </footer>
           </div>
         </div>

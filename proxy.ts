@@ -29,23 +29,27 @@ export async function proxy(request: NextRequest) {
 
   // Si el usuario no tiene sesión
   if (!session) {
-    // Si intenta acceder a una ruta protegida, redirige a login
-    if (isProtectedRoute(path)) {
+    // Solo permite rutas públicas (/login, /register)
+    // Cualquier otra ruta lo redirige a /login
+    if (!isPublicRoute(path)) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
   // Si el usuario tiene sesión
   if (session) {
-    if (path !== "/customer" && (await isClient(session.user.id))) {
+    if (!path.startsWith("/customer") && (await isClient(session.user.id))) {
       return NextResponse.redirect(new URL("/customer", request.url));
     }
 
-    if (path !== "/instructor" && (await isInstructor(session.user.id))) {
+    if (
+      !path.startsWith("/instructor") &&
+      (await isInstructor(session.user.id))
+    ) {
       return NextResponse.redirect(new URL("/instructor", request.url));
     }
 
-    if (path !== "/admin" && (await isAdmin(session.user.id))) {
+    if (!path.startsWith("/admin") && (await isAdmin(session.user.id))) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }

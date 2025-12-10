@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+type InputProps = React.ComponentProps<"input">;
+
 /**
  * Styled Input component that adapts styling depending on the input `type`.
  * - text-like inputs (text, email, password, tel, etc.) get a full-width, rounded style.
@@ -10,7 +12,7 @@ import { cn } from "@/lib/utils";
  * This keeps visual consistency with the app theme (dark/light) while making
  * form controls look correct in the register/login pages.
  */
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", ...props }, ref) => {
     // Base class shared across types
     const base = "outline-none transition-colors motion-safe:duration-150";
