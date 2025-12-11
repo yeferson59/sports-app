@@ -1,5 +1,5 @@
 {
-  "id": "822c6665-35e3-4657-9df2-359e236b47a4",
+  "id": "2558981c-4079-4c4c-a98c-e8724cae321f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -148,7 +148,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "role_name_unique": {
+          "name": "role_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -293,6 +301,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "number_phone": {
+          "name": "number_phone",
+          "type": "char(10)",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -448,18 +462,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "start_time": {
-          "name": "start_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "end_time": {
-          "name": "end_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
         "price_id": {
           "name": "price_id",
           "type": "uuid",
@@ -536,6 +538,21 @@
           "columns": [
             {
               "expression": "timeslot_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "booking_instructor_time_idx": {
+          "name": "booking_instructor_time_idx",
+          "columns": [
+            {
+              "expression": "instructor_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -695,7 +712,7 @@
           "name": "timeslot_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "price_amount": {
           "name": "price_amount",
@@ -708,7 +725,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ARS'"
+          "default": "'COP'"
         },
         "valid_from": {
           "name": "valid_from",
@@ -838,17 +855,17 @@
           "type": "weekday_enum",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "start_time": {
           "name": "start_time",
-          "type": "text",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         },
         "end_time": {
           "name": "end_time",
-          "type": "text",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         },

@@ -19,7 +19,8 @@ CREATE TABLE "account" (
 --> statement-breakpoint
 CREATE TABLE "role" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" "role_enum" NOT NULL
+	"name" "role_enum" NOT NULL,
+	CONSTRAINT "role_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "session" (
@@ -41,6 +42,7 @@ CREATE TABLE "user" (
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" text,
 	"role_id" uuid NOT NULL,
+	"number_phone" char(10),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
@@ -62,8 +64,6 @@ CREATE TABLE "booking" (
 	"with_instructor" boolean DEFAULT false NOT NULL,
 	"instructor_id" text,
 	"timeslot_id" uuid,
-	"start_time" timestamp NOT NULL,
-	"end_time" timestamp NOT NULL,
 	"price_id" uuid,
 	"price_snapshot" numeric,
 	"currency_snapshot" text,
@@ -84,9 +84,9 @@ CREATE TABLE "field" (
 CREATE TABLE "price" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"field_id" uuid NOT NULL,
-	"timeslot_id" uuid,
+	"timeslot_id" uuid NOT NULL,
 	"price_amount" numeric NOT NULL,
-	"currency" text DEFAULT 'ARS' NOT NULL,
+	"currency" text DEFAULT 'COP' NOT NULL,
 	"valid_from" timestamp,
 	"valid_to" timestamp,
 	"is_active" boolean DEFAULT true NOT NULL,
@@ -98,9 +98,9 @@ CREATE TABLE "timeslot" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"field_id" uuid,
 	"user_id" text,
-	"day_of_week" "weekday_enum",
-	"start_time" text NOT NULL,
-	"end_time" text NOT NULL,
+	"day_of_week" "weekday_enum" NOT NULL,
+	"start_time" timestamp NOT NULL,
+	"end_time" timestamp NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -124,6 +124,7 @@ CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("ident
 CREATE INDEX "booking_field_idx" ON "booking" USING btree ("field_id");--> statement-breakpoint
 CREATE INDEX "booking_user_idx" ON "booking" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "booking_timeslot_idx" ON "booking" USING btree ("timeslot_id");--> statement-breakpoint
+CREATE INDEX "booking_instructor_time_idx" ON "booking" USING btree ("instructor_id");--> statement-breakpoint
 CREATE INDEX "price_field_idx" ON "price" USING btree ("field_id");--> statement-breakpoint
 CREATE INDEX "price_timeslot_idx" ON "price" USING btree ("timeslot_id");--> statement-breakpoint
 CREATE INDEX "timeslot_field_idx" ON "timeslot" USING btree ("field_id");--> statement-breakpoint
