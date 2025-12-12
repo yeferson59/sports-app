@@ -39,15 +39,11 @@ export const timeslot = pgTable(
   "timeslot",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    fieldId: uuid("field_id")
-      .notNull()
-      .references(() => field.id),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id),
+    fieldId: uuid("field_id").references(() => field.id),
+    userId: text("user_id").references(() => user.id),
     dayOfWeek: weekday("day_of_week").notNull(),
-    startTime: text("start_time").notNull(),
-    endTime: text("end_time").notNull(),
+    startTime: timestamp("start_time").notNull(),
+    endTime: timestamp("end_time").notNull(),
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -73,7 +69,7 @@ export const price = pgTable(
       .notNull()
       .references(() => timeslot.id),
     priceAmount: numeric("price_amount").notNull(),
-    currency: text("currency").default("ARS").notNull(),
+    currency: text("currency").default("COP").notNull(),
     validFrom: timestamp("valid_from"),
     validTo: timestamp("valid_to"),
     isActive: boolean("is_active").default(true).notNull(),
@@ -104,8 +100,6 @@ export const booking = pgTable(
       onDelete: "set null",
     }),
     timeslotId: uuid("timeslot_id").references(() => timeslot.id),
-    startTime: timestamp("start_time").notNull(),
-    endTime: timestamp("end_time").notNull(),
     priceId: uuid("price_id").references(() => price.id),
     priceSnapshot: numeric("price_snapshot"),
     currencySnapshot: text("currency_snapshot"),
@@ -120,11 +114,7 @@ export const booking = pgTable(
     index("booking_field_idx").on(b.fieldId),
     index("booking_user_idx").on(b.userId),
     index("booking_timeslot_idx").on(b.timeslotId),
-    index("booking_instructor_time_idx").on(
-      b.instructorId,
-      b.startTime,
-      b.endTime,
-    ),
+    index("booking_instructor_time_idx").on(b.instructorId),
   ],
 );
 
