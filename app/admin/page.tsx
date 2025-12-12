@@ -26,7 +26,9 @@ export default function HomeAdminPage() {
           <Link href="/admin/registrar-horario-cancha">
             <Button variant="default">Registrar horarios</Button>
           </Link>
-          <Button variant="destructive">Deshabilitar cancha</Button>
+          <Link href="/admin/deshabilitar-cancha">
+            <Button variant="destructive">Deshabilitar cancha</Button>
+          </Link>
 
           {!isPending && session && <UserMenu user={session.user} />}
         </div>
