@@ -46,7 +46,6 @@ const signUpSchema = z.object({
 });
 
 export const signUp = async (formData: FormData) => {
-  console.log(formData);
   if (formData.get("password") !== formData.get("confirmPassword")) {
     throw new Error("Passwords do not match");
   }
@@ -87,4 +86,3 @@ export const logout = async () => {
 
   redirect("/login");
 };
-
