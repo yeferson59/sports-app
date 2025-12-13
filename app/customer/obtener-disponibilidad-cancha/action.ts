@@ -1,13 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { field, timeslot } from "@/auth-schema";
+import { field, timeslot } from "@/app-schema";
 import { eq } from "drizzle-orm";
-
 
 // Obtener todas las canchas activas
 export async function getAvailableFields() {
-  const fields = await db.select().from(field).where(eq(field.is_active, true));
+  const fields = await db.select().from(field).where(eq(field.isActive, true));
   return fields;
 }
 
@@ -16,7 +15,7 @@ export async function getFieldTimeslots(fieldId: string) {
   const slots = await db
     .select()
     .from(timeslot)
-    .where(eq(timeslot.field_id, fieldId));
+    .where(eq(timeslot.fieldId, fieldId));
 
   return slots;
 }

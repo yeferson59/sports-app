@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { field } from "@/auth-schema";
+import { field } from "@/app-schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -11,9 +11,9 @@ export async function getAllFields() {
     .select({
       id: field.id,
       name: field.name,
-      type: field.type,
-      is_active: field.is_active,
-      created_at: field.created_at,
+      type: field.typeField,
+      is_active: field.isActive,
+      created_at: field.createdAt,
     })
     .from(field)
     .orderBy(field.name);
@@ -34,16 +34,16 @@ export async function disableField(fieldId: string) {
     throw new Error("La cancha no existe");
   }
 
-  if (!existingField[0].is_active) {
+  if (!existingField[0].isActive) {
     throw new Error("La cancha ya está deshabilitada");
   }
 
   // Deshabilitar la cancha
   const updatedField = await db
     .update(field)
-    .set({ 
-      is_active: false,
-      updated_at: new Date(),
+    .set({
+      isActive: false,
+      updatedAt: new Date(),
     })
     .where(eq(field.id, fieldId))
     .returning();
@@ -72,16 +72,16 @@ export async function enableField(fieldId: string) {
     throw new Error("La cancha no existe");
   }
 
-  if (existingField[0].is_active) {
+  if (existingField[0].isActive) {
     throw new Error("La cancha ya está habilitada");
   }
 
   // Habilitar la cancha
   const updatedField = await db
     .update(field)
-    .set({ 
-      is_active: true,
-      updated_at: new Date(),
+    .set({
+      isActive: true,
+      updatedAt: new Date(),
     })
     .where(eq(field.id, fieldId))
     .returning();
