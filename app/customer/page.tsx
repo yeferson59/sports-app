@@ -38,9 +38,7 @@ export default function CustomerHomePage() {
           <h1 className="text-xl font-semibold text-white">ClubPlay</h1>
         </div>
 
-        <Button
-          className="bg-red-500 hover:bg-red-600 text-white"
-        >
+        <Button variant="destructive">
           Cerrar sesión
         </Button>
       </nav>
@@ -59,8 +57,8 @@ export default function CustomerHomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* Apartar cancha */}
-          <Link href="/">
-            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-300/50 backdrop-blur-md transition-all hover:shadow-lg">
+          <Link href="/customer/apartar-cancha">
+            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-300/50 backdrop-blur-md transition-all hover:shadow-lg">
               <h2 className="text-2xl font-semibold flex items-center gap-2">
                  Apartar cancha
               </h2>
@@ -71,7 +69,7 @@ export default function CustomerHomePage() {
           </Link>
 
           {/* Disponibilidad */}
-          <Link href="/obtener-disponibilidad-cancha">
+          <Link href="/customer/obtener-disponibilidad-cancha">
             <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-300/50 backdrop-blur-md transition-all hover:shadow-lg">
               <h2 className="text-2xl font-semibold flex items-center gap-2">
                  Ver disponibilidad
@@ -84,7 +82,7 @@ export default function CustomerHomePage() {
 
           {/* Cancelar cancha */}
           <Link href="/">
-            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-red-300/50 backdrop-blur-md transition-all hover:shadow-lg">
+            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-destructive/50 backdrop-blur-md transition-all hover:shadow-lg">
               <h2 className="text-2xl font-semibold flex items-center gap-2">
                  Cancelar reserva
               </h2>
@@ -96,7 +94,7 @@ export default function CustomerHomePage() {
 
           {/* Mis reservas */}
           <Link href="/">
-            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-yellow-300/50 backdrop-blur-md transition-all hover:shadow-lg">
+            <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-300/50 backdrop-blur-md transition-all hover:shadow-lg">
               <h2 className="text-2xl font-semibold flex items-center gap-2">
                  Mis reservas
               </h2>

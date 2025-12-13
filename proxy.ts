@@ -7,17 +7,9 @@ import { isClient, isInstructor, isAdmin } from "@/lib/user";
 // Rutas públicas - accesibles sin autenticación
 const PUBLIC_ROUTES = ["/login", "/register"];
 
-// Rutas protegidas - requieren autenticación
-const PROTECTED_ROUTES = ["/admin", "/customer", "/instructor"];
-
 // Función para verificar si una ruta es pública
 function isPublicRoute(path: string): boolean {
   return PUBLIC_ROUTES.some((route) => path.startsWith(route));
-}
-
-// Función para verificar si una ruta es protegida
-function isProtectedRoute(path: string): boolean {
-  return PROTECTED_ROUTES.some((route) => path.startsWith(route));
 }
 
 // This function can be marked `async` if using `await` inside

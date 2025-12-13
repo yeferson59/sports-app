@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { field } from "@/app-schema";
-import { eq, sql } from "drizzle-orm";
+import { field, timeslot } from "@/app-schema";
+import { eq } from "drizzle-orm";
 
 type DayOfWeek =
   | "monday"
@@ -72,37 +72,32 @@ export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
     }
   }
 
-  // Insertar usando SQL raw para evitar problemas con Drizzle
+  // Insertar usando Drizzle ORM
   const insertedSlots = [];
 
   for (const slot of timeSlots) {
-    const result = await db.execute(sql`
-      INSERT INTO timeslot (
-        id,
-        field_id,
-        user_id,
-        day_of_week,
-        start_time,
-        end_time,
-        is_active,
-        created_at,
-        updated_at
-      ) VALUES (
-        gen_random_uuid(),
-        ${slot.field_id}::uuid,
-        NULL,
-        ${slot.day_of_week}::weekday_enum,
-        ${slot.start_time}::text,
-        ${slot.end_time}::text,
-        ${slot.is_active}::boolean,
-        NOW(),
-        NOW()
-      )
-      RETURNING *
-    `);
+    // Convertir HH:MM a timestamp
+    const startDate = new Date(`2000-01-01T${slot.start_time}:00`);
+    const endDate = new Date(`2000-01-01T${slot.end_time}:00`);
 
-    if (result && Array.isArray(result)) {
-      insertedSlots.push(result[0]);
+    try {
+      const result = await db
+        .insert(timeslot)
+        .values({
+          fieldId: slot.field_id,
+          dayOfWeek: slot.day_of_week,
+          startTime: startDate,
+          endTime: endDate,
+          isActive: slot.is_active,
+        })
+        .returning();
+
+      if (result && result.length > 0) {
+        insertedSlots.push(result[0]);
+      }
+    } catch (error) {
+      console.error(`Error inserting timeslot for field ${slot.field_id}:`, error);
+      throw error;
     }
   }
 

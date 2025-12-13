@@ -194,44 +194,19 @@ export default function LoginPage() {
                   id="rememberMe"
                   type="checkbox"
                   name="rememberMe"
-                  className="w-4 h-4"
                 />
-                <label
-                  className="text-sm text-slate-300 cursor-pointer"
-                  htmlFor="rememberMe"
-                >
+                <Label htmlFor="rememberMe">
                   Mantener sesión
-                </label>
+                </Label>
               </div>
 
               {/* Primary action replaced with shadcn `Button` */}
               <Button
                 type="submit"
+                size="lg"
                 aria-label="Entrar en ClubPlay"
-                // Use shadcn Button defaults but override visual appearance for brand gradient
-                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 focus-visible:translate-y-0.5 motion-safe:transition-transform motion-safe:duration-150 motion-reduce:transition-none"
+                className="w-full mt-2 bg-linear-to-r from-emerald-400 to-cyan-400 text-slate-900 hover:brightness-105"
               >
-                {/* Decorative svg icon inside button; non-interactive for assistive tech */}
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 11c.828 0 1.5-.672 1.5-1.5S12.828 8 12 8s-1.5.672-1.5 1.5S11.172 11 12 11z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 11v6a2 2 0 002 2h8a2 2 0 002-2v-6M8 11V8a4 4 0 118 0v3"
-                  />
-                </svg>
                 <span>Entrar</span>
               </Button>
 
@@ -249,9 +224,10 @@ export default function LoginPage() {
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <button
+                  <Button
                     type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/7 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 transition-transform motion-safe:duration-150 active:scale-95"
+                    variant="outline"
+                    size="sm"
                     aria-label="Iniciar sesión con Google"
                   >
                     <svg
@@ -278,11 +254,12 @@ export default function LoginPage() {
                       />
                     </svg>
                     Google
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/7 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 transition-transform motion-safe:duration-150 active:scale-95"
+                    variant="outline"
+                    size="sm"
                     aria-label="Iniciar sesión con Facebook"
                   >
                     <svg
@@ -297,7 +274,7 @@ export default function LoginPage() {
                       />
                     </svg>
                     Facebook
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>

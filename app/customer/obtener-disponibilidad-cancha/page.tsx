@@ -83,7 +83,7 @@ export default function DisponibilidadCanchas() {
             />
 
             <div className="w-full mt-4 flex flex-col gap-2">
-              <h3 className="font-semibold text-cyan-400 text-lg">
+              <h3 className="font-semibold text-emerald-400 text-lg">
                 Horarios disponibles
               </h3>
 
@@ -97,7 +97,7 @@ export default function DisponibilidadCanchas() {
                   className="p-3 rounded-lg bg-white/5 border border-white/10"
                 >
                   <p className="text-sm">
-                    <span className="text-cyan-300 font-semibold">
+                    <span className="text-emerald-300 font-semibold">
                       {DAYS_ES[slot.day_of_week]}:
                     </span>{" "}
                     {slot.start_time} - {slot.end_time}
