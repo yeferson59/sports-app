@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getRole } from "@/lib/user";
 
 const signInSchema = z.object({
@@ -34,6 +35,7 @@ export const signIn = async (formData: FormData) => {
     headers: header,
   });
 
+  revalidatePath("/customer");
   redirect("/customer");
 };
 
@@ -72,6 +74,7 @@ export const signUp = async (formData: FormData) => {
     headers: header,
   });
 
+  revalidatePath("/login");
   redirect("/login");
 };
 
@@ -81,5 +84,6 @@ export const logout = async () => {
     headers: header,
   });
 
+  revalidatePath("/login");
   redirect("/login");
 };
