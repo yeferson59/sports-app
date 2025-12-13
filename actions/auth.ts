@@ -1,12 +1,10 @@
 "use server";
 
 import { auth } from "@/auth";
-import { db } from "@/db";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { role } from "@/auth-schema";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { getRole } from "@/lib/user";
 
 const signInSchema = z.object({
   email: z.email(),
@@ -61,10 +59,7 @@ export const signUp = async (formData: FormData) => {
     throw new Error("Error");
   }
 
-  const roleId = await db
-    .select({ id: role.id })
-    .from(role)
-    .where(eq(role.name, "client"));
+  const roleId = await getRole("client");
 
   const header = await headers();
   await auth.api.signUpEmail({
@@ -72,10 +67,12 @@ export const signUp = async (formData: FormData) => {
       name: data.name,
       email: data.email,
       password: data.password,
-      roleId: roleId[0].id,
+      roleId: roleId,
     },
     headers: header,
   });
+
+  redirect("/login");
 };
 
 export const logout = async () => {

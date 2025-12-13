@@ -8,7 +8,6 @@ const main = async () => {
     await tx.insert(role).values({ name: "admin" });
   });
 
-  // IMPORTANTE → cerrar conexión
   await poolClient.end();
 };
 

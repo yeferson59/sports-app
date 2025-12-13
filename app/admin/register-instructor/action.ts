@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { user, role } from "@/auth-schema";
-import { eq } from "drizzle-orm";
+import { user } from "@/auth-schema";
+import { getRole } from "@/lib/user";
 
 export async function registerInstructor(data: {
   firstName: string;
@@ -11,12 +11,7 @@ export async function registerInstructor(data: {
   phone?: string;
   sport: string;
 }) {
-  const instructorRole = await db.query.role.findFirst({
-    where: eq(role.name, "instructor"),
-    columns: { id: true },
-  });
-
-  if (!instructorRole) throw new Error("No existe el rol client");
+  const instructorRoleId = await getRole("instructor");
 
   const newUser = await db
     .insert(user)
@@ -24,7 +19,7 @@ export async function registerInstructor(data: {
       id: crypto.randomUUID(),
       name: `${data.firstName} ${data.lastName}`,
       email: data.email,
-      roleId: instructorRole.id,
+      roleId: instructorRoleId,
       numberPhone: data.phone,
     })
     .returning();
