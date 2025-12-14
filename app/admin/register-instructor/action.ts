@@ -11,7 +11,6 @@ export async function registerInstructor(data: {
   phone?: string;
   sport: string;
 }) {
-<<<<<<< HEAD
   // Obtener el rol "instructor" directamente
   const instructorRole = await db.query.role.findFirst({
     where: eq(role.name, "instructor"),
@@ -37,25 +36,6 @@ export async function registerInstructor(data: {
     email: data.email,
     roleId: instructorRole.id,
   }).returning();
-=======
-  const instructorRole = await db.query.role.findFirst({
-    where: eq(role.name, "instructor"),
-    columns: { id: true },
-  });
-
-  if (!instructorRole) throw new Error("No existe el rol client");
-
-  const newUser = await db
-    .insert(user)
-    .values({
-      id: crypto.randomUUID(),
-      name: `${data.firstName} ${data.lastName}`,
-      email: data.email,
-      roleId: instructorRole.id,
-      numberPhone: data.phone,
-    })
-    .returning();
->>>>>>> fd7731926192008c60e49c02fec1236087ef75c8
 
   return newUser[0];
 }
