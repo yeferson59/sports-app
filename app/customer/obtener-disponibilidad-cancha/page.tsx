@@ -7,10 +7,11 @@ import { AdminHeader } from "@/components/admin-header";
 
 interface TimeSlot {
   id: string;
-  day_of_week: string;
-  start_time: string;
-  end_time: string;
-  is_active: boolean;
+  dayOfWeek: string;
+  startTime: Date;
+  endTime: Date;
+  surchargePercent: string;
+  isActive: boolean;
 }
 
 interface FieldAvailability {
@@ -98,9 +99,9 @@ export default function DisponibilidadCanchas() {
                 >
                   <p className="text-sm">
                     <span className="text-emerald-300 font-semibold">
-                      {DAYS_ES[slot.day_of_week]}:
+                      {DAYS_ES[slot.dayOfWeek]}:
                     </span>{" "}
-                    {slot.start_time} - {slot.end_time}
+                    {new Date(slot.startTime).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })} - {new Date(slot.endTime).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               ))}

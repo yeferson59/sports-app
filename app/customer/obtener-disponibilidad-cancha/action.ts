@@ -1,21 +1,39 @@
 "use server";
 
 import { db } from "@/db";
-import { field, timeslot } from "@/app-schema";
+import { field, timeslot, fieldTimeslot } from "@/app-schema";
 import { eq } from "drizzle-orm";
 
 // Obtener todas las canchas activas
 export async function getAvailableFields() {
-  const fields = await db.select().from(field).where(eq(field.isActive, true));
+  const fields = await db
+    .select({
+      id: field.id,
+      name: field.name,
+      type: field.typeField,
+      isActive: field.isActive,
+      createdAt: field.createdAt,
+      updatedAt: field.updatedAt,
+    })
+    .from(field)
+    .where(eq(field.isActive, true));
   return fields;
 }
 
 // Obtener los horarios por cancha
 export async function getFieldTimeslots(fieldId: string) {
   const slots = await db
-    .select()
-    .from(timeslot)
-    .where(eq(timeslot.fieldId, fieldId));
+    .select({
+      id: timeslot.id,
+      dayOfWeek: timeslot.dayOfWeek,
+      startTime: timeslot.startTime,
+      endTime: timeslot.endTime,
+      surchargePercent: timeslot.surchargePercent,
+      isActive: timeslot.isActive,
+    })
+    .from(fieldTimeslot)
+    .innerJoin(timeslot, eq(fieldTimeslot.timeslotId, timeslot.id))
+    .where(eq(fieldTimeslot.fieldId, fieldId));
 
   return slots;
 }

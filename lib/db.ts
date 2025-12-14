@@ -27,14 +27,7 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-// Calcular precio base según si es después de las 5 PM
-const calculatePrice = (hour: number, basePrice: number) => {
-  // Después de las 5 PM (17:00) hay recargo de 2%
-  if (hour >= 17) {
-    return (basePrice * 1.02).toString();
-  }
-  return basePrice.toString();
-};
+
 
 const main = async () => {
   await db.transaction(async (tx) => {
@@ -70,58 +63,36 @@ const main = async () => {
       console.log(`  ✓ ${fieldData.name} creada`);
     }
 
-    // Precios base por tipo de cancha
-    const basePrices = {
-      "futbol-6": 100000, // $100.000 COP
-      padel: 120000, // $120.000 COP
-    };
-
-    // Crear franjas horarias para cada cancha
-    console.log("🕐 Creando franjas horarias...");
+    // Crear franjas horarias genéricas (sin asignar a canchas)
+    console.log("🕐 Creando franjas horarias genéricas...");
     const timeSlots = generateTimeSlots();
     let timeslotCount = 0;
 
-    for (let fieldIndex = 0; fieldIndex < fieldIds.length; fieldIndex++) {
-      const fieldId = fieldIds[fieldIndex];
-      const fieldType = fieldsData[fieldIndex].type;
-      const basePrice = basePrices[fieldType];
-
-      // Crear franjas para cada día de la semana
-      for (const day of DAYS_OF_WEEK) {
-        for (const slot of timeSlots) {
-          // Crear timeslot
-          const [insertedTimeslot] = await tx
-            .insert(timeslot)
-            .values({
-              fieldId,
-              dayOfWeek: day,
-              startTime: new Date(`2024-01-01T${slot.start}:00Z`),
-              endTime: new Date(`2024-01-01T${slot.end}:00Z`),
-              isActive: true,
-            })
-            .returning({ id: timeslot.id });
-
-          // Crear precio asociado a la franja
-          const slotPrice = calculatePrice(slot.hour, basePrice);
-
-          await tx.insert(price).values({
-            fieldId,
-            timeslotId: insertedTimeslot.id,
-            priceAmount: slotPrice,
-            currency: "COP",
+    // Crear franjas para cada día de la semana
+    for (const day of DAYS_OF_WEEK) {
+      for (const slot of timeSlots) {
+        // Crear timeslot usando Date.UTC para evitar conversión de zona horaria
+        const startDate = new Date(Date.UTC(2024, 0, 1, slot.hour, 0, 0));
+        const endDate = new Date(Date.UTC(2024, 0, 1, slot.hour + 1, 0, 0));
+        
+        // Sobrecargo del 2% después de las 5 PM (17:00)
+        const surcharge = slot.hour >= 17 ? "2" : "0";
+        
+        await tx
+          .insert(timeslot)
+          .values({
+            dayOfWeek: day,
+            startTime: startDate,
+            endTime: endDate,
+            surchargePercent: surcharge,
             isActive: true,
           });
 
-          timeslotCount++;
-        }
+        timeslotCount++;
       }
-
-      console.log(
-        `  ✓ ${fieldsData[fieldIndex].name}: ${timeSlots.length * DAYS_OF_WEEK.length} franjas creadas`
-      );
     }
 
-    console.log(`✅ Total de ${timeslotCount} franjas horarias creadas`);
+    console.log(`✅ Total de ${timeslotCount} franjas horarias genéricas creadas`);
   });
 
   await poolClient.end();
@@ -135,7 +106,8 @@ main()
     console.log("║ Roles: 3                               ║");
     console.log("║ Canchas: 4 (2 Fútbol 6, 2 Pádel)      ║");
     console.log("║ Franjas horarias: 8 AM - 9 PM         ║");
-    console.log("║ Recargo después de 5 PM: 2%           ║");
+    console.log("║ (Sin asignar a canchas - Admin lo    ║");
+    console.log("║  asignará después)                     ║");
     console.log("╚════════════════════════════════════════╝\n");
   })
   .catch((err) => {

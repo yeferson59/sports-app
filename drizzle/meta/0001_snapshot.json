@@ -1,6 +1,6 @@
 {
-  "id": "28227854-5b24-46e7-b8f7-1c62ef6107ba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "b1f3d2ef-90d9-4c35-a71b-1195ea0e465b",
+  "prevId": "28227854-5b24-46e7-b8f7-1c62ef6107ba",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -931,12 +931,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "field_id": {
-          "name": "field_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "user_id": {
           "name": "user_id",
           "type": "text",
@@ -992,21 +986,6 @@
         }
       },
       "indexes": {
-        "timeslot_field_idx": {
-          "name": "timeslot_field_idx",
-          "columns": [
-            {
-              "expression": "field_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "timeslot_user_idx": {
           "name": "timeslot_user_idx",
           "columns": [
@@ -1039,19 +1018,6 @@
         }
       },
       "foreignKeys": {
-        "timeslot_field_id_field_id_fk": {
-          "name": "timeslot_field_id_field_id_fk",
-          "tableFrom": "timeslot",
-          "tableTo": "field",
-          "columnsFrom": [
-            "field_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "timeslot_user_id_user_id_fk": {
           "name": "timeslot_user_id_user_id_fk",
           "tableFrom": "timeslot",

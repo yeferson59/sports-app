@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { getActiveFields, getAvailableSlots, createBooking } from "./action";
+import { getActiveFields, getAvailableSlots, createBooking, getAvailableInstructorsForSlot } from "./action";
 import { ChevronDown, ChevronUp, Check, X, Calendar, Clock } from "lucide-react";
 
 type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
@@ -20,12 +20,16 @@ interface Field {
 
 interface TimeSlot {
   id: string;
+  fieldTimeslotId: string;
   fieldId: string;
   dayOfWeek: DayOfWeek;
   startTime: Date;
   endTime: Date;
+  surchargePercent: string;
   isActive: boolean;
-  priceAmount: string | null;
+  basePrice: string | null;
+  instructorPrice: string | null;
+  calculatedPrice: string;
 }
 
 interface FieldExpanded {
@@ -47,8 +51,9 @@ const getDayLabel = (day: DayOfWeek): string => {
 };
 
 const formatTime = (date: Date): string => {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const d = new Date(date);
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
@@ -66,14 +71,19 @@ export default function ApartarCancha() {
   const { data: session } = authClient.useSession();
   const [fields, setFields] = useState<Field[]>([]);
   const [selectedField, setSelectedField] = useState<string>("");
+  const [selectedFieldType, setSelectedFieldType] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>("monday");
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [withInstructor, setWithInstructor] = useState<boolean>(false);
+  const [availableInstructors, setAvailableInstructors] = useState<Array<{id: string, name: string | null, email: string}>>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingInstructors, setLoadingInstructors] = useState(false);
   const [loadingFields, setLoadingFields] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedFields, setExpandedFields] = useState<FieldExpanded>({});
-  const [bookingInProgress, setBookingInProgress] = useState<string | null>(null);
+  const [bookingInProgress, setBookingInProgress] = useState(false);
 
   // Verificar autenticación
   useEffect(() => {
@@ -91,6 +101,7 @@ export default function ApartarCancha() {
         
         if (activeFields.length > 0) {
           setSelectedField(activeFields[0].id);
+          setSelectedFieldType(activeFields[0].type);
           const expandedState: FieldExpanded = {};
           expandedState[activeFields[0].id] = true;
           setExpandedFields(expandedState);
@@ -126,29 +137,128 @@ export default function ApartarCancha() {
     loadSlots();
   }, [selectedField, selectedDay]);
 
-  const handleBooking = async (timeslotId: string) => {
+  const toggleSlotSelection = (timeslotId: string) => {
+    setSelectedSlots(prev => 
+      prev.includes(timeslotId)
+        ? prev.filter(id => id !== timeslotId)
+        : [...prev, timeslotId]
+    );
+  };
+
+  // Cargar instructores cuando se activa el checkbox de instructor
+  useEffect(() => {
+    async function loadInstructors() {
+      if (!withInstructor || selectedSlots.length === 0 || selectedFieldType !== "padel") {
+        setAvailableInstructors([]);
+        return;
+      }
+
+      setLoadingInstructors(true);
+      try {
+        // Verificar si TODAS las franjas tienen el mismo instructor
+        const instructorsBySlot = await Promise.all(
+          selectedSlots.map(slotId => getAvailableInstructorsForSlot(slotId))
+        );
+
+        // Filtrar franjas que tienen instructor
+        const slotsWithInstructor = instructorsBySlot.filter(instructors => instructors.length > 0);
+        
+        if (slotsWithInstructor.length === 0) {
+          // Ninguna franja tiene instructor
+          setAvailableInstructors([]);
+        } else if (slotsWithInstructor.length === selectedSlots.length) {
+          // Todas las franjas tienen instructor
+          // Verificar si es el mismo instructor en todas
+          const firstInstructor = slotsWithInstructor[0][0];
+          const sameInstructor = slotsWithInstructor.every(
+            instructors => instructors[0].id === firstInstructor.id
+          );
+          
+          if (sameInstructor) {
+            setAvailableInstructors([firstInstructor]);
+          } else {
+            // Diferentes instructores en diferentes franjas
+            setAvailableInstructors([]);
+          }
+        } else {
+          // Algunas franjas tienen instructor, otras no
+          setAvailableInstructors([]);
+        }
+      } catch (err: any) {
+        console.error("Error loading instructors:", err);
+      } finally {
+        setLoadingInstructors(false);
+      }
+    }
+
+    loadInstructors();
+  }, [withInstructor, selectedSlots, selectedFieldType]);
+
+  const calculateTotal = () => {
+    const selected = availableSlots.filter(slot => selectedSlots.includes(slot.id));
+    let total = 0;
+    
+    selected.forEach(slot => {
+      const slotPrice = parseFloat(slot.calculatedPrice);
+      const instructorCost = withInstructor && selectedFieldType === "padel" 
+        ? parseFloat(slot.instructorPrice || "0") 
+        : 0;
+      total += slotPrice + instructorCost;
+    });
+    
+    return total;
+  };
+
+  const handleConfirmBooking = async () => {
     if (!session?.user?.id) {
       setError("Debes iniciar sesión para reservar");
       return;
     }
 
+    if (selectedSlots.length === 0) {
+      setError("Debes seleccionar al menos una franja horaria");
+      return;
+    }
+
     try {
-      setBookingInProgress(timeslotId);
+      setBookingInProgress(true);
       setError(null);
       setMessage(null);
 
-      await createBooking(selectedField, timeslotId, session.user.id, false);
-      setMessage("¡Reserva confirmada! Puedes verla en 'Mis Reservas'");
+      // Validar que si se requiere instructor, haya instructor disponible
+      if (withInstructor && availableInstructors.length === 0) {
+        setError("No hay instructor disponible para las franjas seleccionadas");
+        setBookingInProgress(false);
+        return;
+      }
 
-      // Recargar slots
+      const instructorToUse = withInstructor ? (availableInstructors[0]?.id || "") : "";
+
+      // Crear reservas para cada franja seleccionada
+      for (const timeslotId of selectedSlots) {
+        await createBooking(
+          selectedField, 
+          timeslotId, 
+          session.user.id, 
+          withInstructor,
+          instructorToUse || undefined
+        );
+      }
+
+      setMessage(`¡${selectedSlots.length} reserva(s) confirmada(s)! Puedes verlas en 'Mis Reservas'`);
+
+      // Limpiar selección y recargar
+      setSelectedSlots([]);
+      setWithInstructor(false);
+      setAvailableInstructors([]);
       const slots = await getAvailableSlots(selectedField, selectedDay);
       setAvailableSlots(slots as TimeSlot[]);
 
       setTimeout(() => setMessage(null), 5000);
     } catch (err: any) {
-      setError(err.message || "Error al crear la reserva");
+      setError(err.message || "Error al crear las reservas");
     } finally {
-      setBookingInProgress(null);
+      setBookingInProgress(false);
     }
   };
 
@@ -215,8 +325,11 @@ export default function ApartarCancha() {
             id="field-select"
             value={selectedField}
             onChange={(e) => {
+              const field = fields.find(f => f.id === e.target.value);
               setSelectedField(e.target.value);
+              setSelectedFieldType(field?.type || "");
               setSelectedDay("monday");
+              setWithInstructor(false);
             }}
           >
             {fields.map((f) => (
@@ -266,51 +379,173 @@ export default function ApartarCancha() {
               <p className="text-slate-400">No hay horarios disponibles para este día</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {availableSlots.map((slot) => (
-                <div
-                  key={slot.id}
-                  className="p-4 rounded-lg bg-slate-800/40 border border-white/10 hover:border-emerald-400/50 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-lg font-semibold text-emerald-400">
-                      {formatTime(new Date(slot.startTime))} - {formatTime(new Date(slot.endTime))}
-                    </div>
-                  </div>
-
-                  <div className="mb-4 pb-4 border-b border-white/10">
-                    <p className="text-sm text-slate-300">
-                      <span className="font-semibold">{formatPrice(slot.priceAmount)}</span>
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={() => handleBooking(slot.id)}
-                    disabled={bookingInProgress === slot.id}
-                    size="sm"
-                    className="w-full"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {availableSlots.map((slot) => {
+                const isSelected = selectedSlots.includes(slot.id);
+                return (
+                  <button
+                    key={slot.id}
+                    onClick={() => toggleSlotSelection(slot.id)}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-500/10"
+                        : "border-white/10 bg-slate-800/40 hover:border-white/30"
+                    }`}
                   >
-                    {bookingInProgress === slot.id ? "Reservando..." : "Reservar"}
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-semibold text-emerald-400">
+                        {formatTime(new Date(slot.startTime))}
+                      </div>
+                      {parseFloat(slot.surchargePercent) > 0 && (
+                        <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
+                          +{slot.surchargePercent}%
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-400 mb-2">
+                      {formatTime(new Date(slot.endTime))}
+                    </div>
+                    <div className="text-sm text-slate-300 font-semibold">
+                      {formatPrice(slot.calculatedPrice)}
+                    </div>
+                    {isSelected && (
+                      <div className="mt-2 pt-2 border-t border-emerald-500/30">
+                        <Check className="w-4 h-4 text-emerald-400" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
 
+        {/* Resumen y Confirmación */}
+        {selectedSlots.length > 0 && (
+          <div className="bg-slate-800 p-6 rounded-lg border border-emerald-500/50 shadow-2xl sticky bottom-8 z-50">
+            <h3 className="text-xl font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              Resumen de Reserva
+            </h3>
+
+            {/* Franjas seleccionadas */}
+            <div className="mb-4 space-y-2">
+              <p className="text-sm text-slate-400 font-semibold">
+                Franjas seleccionadas ({selectedSlots.length}):
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {availableSlots
+                  .filter(slot => selectedSlots.includes(slot.id))
+                  .map(slot => (
+                    <span
+                      key={slot.id}
+                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm"
+                    >
+                      {formatTime(new Date(slot.startTime))} - {formatTime(new Date(slot.endTime))}
+                    </span>
+                  ))}
+              </div>
+            </div>
+
+            {/* Opción de instructor (solo pádel) */}
+            {selectedFieldType === "padel" && (
+              <div className="mb-4 p-4 bg-slate-700/50 rounded-lg space-y-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="global-instructor"
+                    checked={withInstructor}
+                    onChange={(e) => setWithInstructor(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-600 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <label htmlFor="global-instructor" className="text-sm text-slate-300 cursor-pointer font-semibold">
+                    Agregar instructor a todas las franjas
+                  </label>
+                </div>
+                
+                {withInstructor && (
+                  <>
+                    {loadingInstructors ? (
+                      <p className="text-xs text-slate-400">Verificando disponibilidad de instructores...</p>
+                    ) : availableInstructors.length === 0 ? (
+                      <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
+                        <p className="text-xs text-orange-400 mb-1 font-semibold">
+                          ⚠️ No hay instructor disponible
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          Las franjas seleccionadas no tienen el mismo instructor asignado o algunas no tienen instructor. 
+                          Por favor, selecciona franjas con el mismo instructor.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded">
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">
+                            ✓ Instructor disponible
+                          </p>
+                          <p className="text-sm text-white font-medium">
+                            {availableInstructors[0].name || availableInstructors[0].email}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Costo: {formatPrice(availableSlots[0]?.instructorPrice || "0")} × {selectedSlots.length} franjas
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-300 font-semibold">Total a pagar:</span>
+                <span className="text-2xl font-bold text-emerald-400">
+                  {formatPrice(calculateTotal().toString())}
+                </span>
+              </div>
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setSelectedSlots([]);
+                  setWithInstructor(false);
+                }}
+                variant="outline"
+                className="flex-1"
+                disabled={bookingInProgress}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmBooking}
+                className="flex-1"
+                disabled={bookingInProgress}
+              >
+                {bookingInProgress ? "Procesando..." : "Confirmar Reserva"}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Info */}
-        <div className="bg-slate-800/50 p-4 rounded-lg border border-emerald-500/30">
-          <h3 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Cómo reservar
-          </h3>
-          <ul className="text-sm text-slate-300 space-y-1">
-            <li>✓ Selecciona la cancha que deseas</li>
-            <li>✓ Elige el día de tu preferencia</li>
-            <li>✓ Selecciona el horario disponible</li>
-            <li>✓ Confirma tu reserva</li>
-          </ul>
-        </div>
+        {selectedSlots.length === 0 && (
+          <div className="bg-slate-800/50 p-4 rounded-lg border border-emerald-500/30">
+            <h3 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Cómo reservar
+            </h3>
+            <ul className="text-sm text-slate-300 space-y-1">
+              <li>✓ Selecciona la cancha que deseas</li>
+              <li>✓ Elige el día de tu preferencia</li>
+              <li>✓ Haz clic en las franjas horarias que quieres reservar</li>
+              <li>✓ Revisa el resumen y confirma tu reserva</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
