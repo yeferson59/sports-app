@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { AdminHeader } from "@/components/admin-header";
 import { useState } from "react";
 //importat acción de registro de instructor
@@ -73,8 +74,16 @@ export default function RegisterInstructorPage() {
           </header>
 
           {/* Mensajes */}
-          {message && <p className="mb-4 text-green-400">{message}</p>}
-          {error && <p className="mb-4 text-red-400">{error}</p>}
+          {message && (
+            <div className="mb-4 p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/50">
+              <p className="text-emerald-400">{message}</p>
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-destructive/20 border border-destructive/50">
+              <p className="text-destructive">{error}</p>
+            </div>
+          )}
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -101,15 +110,15 @@ export default function RegisterInstructorPage() {
 
             <div>
               <Label htmlFor="sport" required>Disciplina</Label>
-              <select
+              <Select
                 id="sport"
                 name="sport"
                 required
-                className="mt-2 w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 transition-shadow motion-safe:duration-150"
+                className="mt-2"
               >
                 <option value="">Selecciona una disciplina</option>
                 <option value="padel">Pádel</option>
-              </select>
+              </Select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -124,7 +133,7 @@ export default function RegisterInstructorPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full mt-2" disabled={loading}>
+             <Button type="submit" size="lg" className="w-full mt-2" disabled={loading}>
               {loading ? "Registrando..." : "Registrar Instructor"}
             </Button>
           </form>

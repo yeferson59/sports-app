@@ -15,6 +15,7 @@ interface Field {
 }
 
 const cardClass = `
+  relative
   bg-slate-800/40
   rounded-xl
   border border-white/10
@@ -103,13 +104,13 @@ export default function DeshabilitarCanchaPage() {
 
       {/* Mensajes */}
       {message && (
-        <div className="mt-6 p-4 rounded-lg bg-green-500/20 border border-green-500/50 max-w-2xl mx-auto">
-          <p className="text-green-400 text-center">{message}</p>
+        <div className="mt-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 max-w-2xl mx-auto">
+          <p className="text-emerald-400 text-center">{message}</p>
         </div>
       )}
       {error && (
-        <div className="mt-6 p-4 rounded-lg bg-red-500/20 border border-red-500/50 max-w-2xl mx-auto">
-          <p className="text-red-400 text-center">{error}</p>
+        <div className="mt-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 max-w-2xl mx-auto">
+          <p className="text-destructive text-center">{error}</p>
         </div>
       )}
 
@@ -125,16 +126,16 @@ export default function DeshabilitarCanchaPage() {
         {fields.map((field, index) => (
           <div 
             key={field.id} 
-            className={`${cardClass} ${!field.is_active ? 'opacity-60 border-red-500/30' : ''}`}
+            className={`${cardClass} ${!field.is_active ? 'opacity-60 border-destructive/30' : ''}`}
           >
             {/* Badge de estado */}
             <div className="absolute top-4 right-4">
               {field.is_active ? (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 border border-green-500/50">
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50">
                   Activa
                 </span>
               ) : (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/50">
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-destructive/20 text-destructive border border-destructive/50">
                   Deshabilitada
                 </span>
               )}
@@ -160,11 +161,8 @@ export default function DeshabilitarCanchaPage() {
             <Button
               onClick={() => handleToggleField(field.id, field.is_active)}
               disabled={loading === field.id}
-              className={`w-full mt-2 ${
-                field.is_active
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-green-500 hover:bg-green-600'
-              }`}
+              variant={field.is_active ? "destructive" : "default"}
+              className="w-full mt-2"
             >
               {loading === field.id
                 ? 'Procesando...'

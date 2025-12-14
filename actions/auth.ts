@@ -1,12 +1,11 @@
 "use server";
 
 import { auth } from "@/auth";
-import { db } from "@/db";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { role } from "@/auth-schema";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { getRole } from "@/lib/user";
 
 const signInSchema = z.object({
   email: z.email(),
@@ -36,6 +35,7 @@ export const signIn = async (formData: FormData) => {
     headers: header,
   });
 
+  revalidatePath("/customer");
   redirect("/customer");
 };
 
@@ -46,7 +46,6 @@ const signUpSchema = z.object({
 });
 
 export const signUp = async (formData: FormData) => {
-  console.log(formData);
   if (formData.get("password") !== formData.get("confirmPassword")) {
     throw new Error("Passwords do not match");
   }
@@ -62,10 +61,7 @@ export const signUp = async (formData: FormData) => {
     throw new Error("Error");
   }
 
-  const roleId = await db
-    .select({ id: role.id })
-    .from(role)
-    .where(eq(role.name, "client"));
+  const roleId = await getRole("client");
 
   const header = await headers();
   await auth.api.signUpEmail({
@@ -73,10 +69,13 @@ export const signUp = async (formData: FormData) => {
       name: data.name,
       email: data.email,
       password: data.password,
-      roleId: roleId[0].id,
+      roleId: roleId,
     },
     headers: header,
   });
+
+  revalidatePath("/login");
+  redirect("/login");
 };
 
 export const logout = async () => {
@@ -85,6 +84,6 @@ export const logout = async () => {
     headers: header,
   });
 
+  revalidatePath("/login");
   redirect("/login");
 };
-

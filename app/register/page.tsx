@@ -236,47 +236,23 @@ export default function RegisterPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="mt-1 w-4 h-4"
-                  aria-required="true"
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-sm text-slate-300 cursor-pointer"
-                >
+                <Label htmlFor="terms">
                   Acepto los{" "}
                   <a href="#" className="text-emerald-300 hover:underline">
                     términos y condiciones
                   </a>
-                </label>
+                </Label>
               </div>
 
               {/* Primary action uses shadcn Button with microinteraction classes */}
               <Button
                 type="submit"
+                size="lg"
                 aria-label="Crear cuenta"
-                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-900 shadow hover:brightness-105 active:scale-95 motion-safe:transition-transform motion-safe:duration-150"
+                className="w-full mt-2 bg-linear-to-r from-emerald-400 to-cyan-400 text-slate-900 hover:brightness-105"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"
-                  />
-                </svg>
-                Crear cuenta
+                <span>Crear cuenta</span>
               </Button>
 
               <div className="pt-3">
@@ -292,10 +268,11 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     aria-label="Registrarse con Google"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/7 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 active:scale-95 motion-safe:transition-transform motion-safe:duration-150"
                   >
                     <svg
                       className="w-4 h-4"
@@ -321,12 +298,13 @@ export default function RegisterPage() {
                       />
                     </svg>
                     Google
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     aria-label="Registrarse con Facebook"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/7 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-95 motion-safe:transition-transform motion-safe:duration-150"
                   >
                     <svg
                       className="w-4 h-4"
@@ -340,7 +318,7 @@ export default function RegisterPage() {
                       />
                     </svg>
                     Facebook
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>

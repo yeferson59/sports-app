@@ -64,9 +64,12 @@ CREATE TABLE "booking" (
 	"with_instructor" boolean DEFAULT false NOT NULL,
 	"instructor_id" text,
 	"timeslot_id" uuid,
-	"price_id" uuid,
-	"price_snapshot" numeric,
-	"currency_snapshot" text,
+	"field_timeslot_id" uuid,
+	"base_price_snapshot" numeric NOT NULL,
+	"surcharge_snapshot" numeric DEFAULT '0' NOT NULL,
+	"instructor_price_snapshot" numeric DEFAULT '0' NOT NULL,
+	"total_price" numeric NOT NULL,
+	"currency" text DEFAULT 'COP' NOT NULL,
 	"status" text DEFAULT 'confirmed' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -81,14 +84,21 @@ CREATE TABLE "field" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "price" (
+CREATE TABLE "field_timeslot" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"field_id" uuid NOT NULL,
 	"timeslot_id" uuid NOT NULL,
-	"price_amount" numeric NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "price" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"field_timeslot_id" uuid NOT NULL,
+	"base_price" numeric NOT NULL,
+	"instructor_price" numeric DEFAULT '0' NOT NULL,
 	"currency" text DEFAULT 'COP' NOT NULL,
-	"valid_from" timestamp,
-	"valid_to" timestamp,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -101,6 +111,7 @@ CREATE TABLE "timeslot" (
 	"day_of_week" "weekday_enum" NOT NULL,
 	"start_time" timestamp NOT NULL,
 	"end_time" timestamp NOT NULL,
+	"surcharge_percent" numeric DEFAULT '0' NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -113,9 +124,10 @@ ALTER TABLE "booking" ADD CONSTRAINT "booking_field_id_field_id_fk" FOREIGN KEY 
 ALTER TABLE "booking" ADD CONSTRAINT "booking_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "booking" ADD CONSTRAINT "booking_instructor_id_user_id_fk" FOREIGN KEY ("instructor_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "booking" ADD CONSTRAINT "booking_timeslot_id_timeslot_id_fk" FOREIGN KEY ("timeslot_id") REFERENCES "public"."timeslot"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "booking" ADD CONSTRAINT "booking_price_id_price_id_fk" FOREIGN KEY ("price_id") REFERENCES "public"."price"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "price" ADD CONSTRAINT "price_field_id_field_id_fk" FOREIGN KEY ("field_id") REFERENCES "public"."field"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "price" ADD CONSTRAINT "price_timeslot_id_timeslot_id_fk" FOREIGN KEY ("timeslot_id") REFERENCES "public"."timeslot"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "booking" ADD CONSTRAINT "booking_field_timeslot_id_field_timeslot_id_fk" FOREIGN KEY ("field_timeslot_id") REFERENCES "public"."field_timeslot"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "field_timeslot" ADD CONSTRAINT "field_timeslot_field_id_field_id_fk" FOREIGN KEY ("field_id") REFERENCES "public"."field"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "field_timeslot" ADD CONSTRAINT "field_timeslot_timeslot_id_timeslot_id_fk" FOREIGN KEY ("timeslot_id") REFERENCES "public"."timeslot"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "price" ADD CONSTRAINT "price_field_timeslot_id_field_timeslot_id_fk" FOREIGN KEY ("field_timeslot_id") REFERENCES "public"."field_timeslot"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "timeslot" ADD CONSTRAINT "timeslot_field_id_field_id_fk" FOREIGN KEY ("field_id") REFERENCES "public"."field"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "timeslot" ADD CONSTRAINT "timeslot_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
@@ -125,8 +137,9 @@ CREATE INDEX "booking_field_idx" ON "booking" USING btree ("field_id");--> state
 CREATE INDEX "booking_user_idx" ON "booking" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "booking_timeslot_idx" ON "booking" USING btree ("timeslot_id");--> statement-breakpoint
 CREATE INDEX "booking_instructor_time_idx" ON "booking" USING btree ("instructor_id");--> statement-breakpoint
-CREATE INDEX "price_field_idx" ON "price" USING btree ("field_id");--> statement-breakpoint
-CREATE INDEX "price_timeslot_idx" ON "price" USING btree ("timeslot_id");--> statement-breakpoint
+CREATE INDEX "field_timeslot_field_idx" ON "field_timeslot" USING btree ("field_id");--> statement-breakpoint
+CREATE INDEX "field_timeslot_timeslot_idx" ON "field_timeslot" USING btree ("timeslot_id");--> statement-breakpoint
+CREATE INDEX "price_field_timeslot_idx" ON "price" USING btree ("field_timeslot_id");--> statement-breakpoint
 CREATE INDEX "timeslot_field_idx" ON "timeslot" USING btree ("field_id");--> statement-breakpoint
 CREATE INDEX "timeslot_user_idx" ON "timeslot" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "timeslot_day_idx" ON "timeslot" USING btree ("day_of_week");

@@ -23,7 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       // visual & theme-aware
       "bg-white/5 border border-white/10 text-white placeholder:text-slate-400 shadow-sm",
       // focus
-      "focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2",
+      "focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2",
     );
 
     // Styles for checkbox inputs

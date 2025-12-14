@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import { user, role } from "@/auth-schema";
 import { eq } from "drizzle-orm";
+import { getRole } from "@/lib/user";
 
 export async function registerInstructor(data: {
   firstName: string;

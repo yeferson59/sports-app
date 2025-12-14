@@ -1,24 +1,15 @@
 "use server";
 
 import { db } from "@/db";
-import { field } from "@/app-schema";
-import { eq, sql } from "drizzle-orm";
+import { field, timeslot, fieldTimeslot, price } from "@/app-schema";
+import { eq, and, inArray } from "drizzle-orm";
 
-type DayOfWeek =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
-
-interface TimeSlotData {
+interface AssignTimeslotData {
+  timeslot_ids: string[];
   field_id: string;
-  start_time: string;
-  end_time: string;
-  day_of_week: DayOfWeek;
-  is_active: boolean;
+  user_id?: string;
+  base_price?: string;
+  instructor_price?: string;
 }
 
 // Obtener todas las canchas activas
@@ -35,80 +26,171 @@ export async function getActiveFields() {
   return activeFields;
 }
 
-// Guardar múltiples horarios
-export async function saveTimeSlots(timeSlots: TimeSlotData[]) {
-  // Validar que haya al menos un horario
-  if (!timeSlots || timeSlots.length === 0) {
-    throw new Error("Debes agregar al menos un horario.");
+// Obtener franjas horarias disponibles para asignar a una cancha
+export async function getAvailableTimeslots(fieldId: string) {
+  // Obtener todas las franjas
+  const allSlots = await db
+    .select({
+      id: timeslot.id,
+      dayOfWeek: timeslot.dayOfWeek,
+      startTime: timeslot.startTime,
+      endTime: timeslot.endTime,
+      isActive: timeslot.isActive,
+    })
+    .from(timeslot);
+
+  // Obtener franjas YA asignadas a esta cancha
+  const assignedToField = await db
+    .select({
+      timeslotId: fieldTimeslot.timeslotId,
+    })
+    .from(fieldTimeslot)
+    .where(eq(fieldTimeslot.fieldId, fieldId));
+
+  const assignedTimeslotIds = new Set(
+    assignedToField.map((ft) => ft.timeslotId),
+  );
+
+  // Filtrar solo las que NO están asignadas a esta cancha
+  const availableSlots = allSlots.filter(
+    (slot) => !assignedTimeslotIds.has(slot.id),
+  );
+
+  return availableSlots;
+}
+
+// Obtener franjas horarias asignadas a una cancha
+export async function getFieldTimeslots(fieldId: string) {
+  const fieldSlots = await db
+    .select({
+      id: timeslot.id,
+      fieldTimeslotId: fieldTimeslot.id,
+      dayOfWeek: timeslot.dayOfWeek,
+      startTime: timeslot.startTime,
+      endTime: timeslot.endTime,
+      surchargePercent: timeslot.surchargePercent,
+      isActive: timeslot.isActive,
+      basePrice: price.basePrice,
+      instructorPrice: price.instructorPrice,
+    })
+    .from(fieldTimeslot)
+    .innerJoin(timeslot, eq(fieldTimeslot.timeslotId, timeslot.id))
+    .leftJoin(price, eq(fieldTimeslot.id, price.fieldTimeslotId))
+    .where(eq(fieldTimeslot.fieldId, fieldId));
+
+  return fieldSlots;
+}
+
+// Asignar franjas horarias a una cancha
+export async function assignTimeslotsToField(data: AssignTimeslotData) {
+  const { timeslot_ids, field_id, base_price, instructor_price } = data;
+
+  // Validar que haya al menos una franja
+  if (!timeslot_ids || timeslot_ids.length === 0) {
+    throw new Error("Debes seleccionar al menos una franja horaria.");
   }
 
-  // Validar que todas las canchas existan
-  const fieldIds = [...new Set(timeSlots.map((ts) => ts.field_id))];
+  // Validar que la cancha exista
+  const existingField = await db
+    .select({ id: field.id, typeField: field.typeField })
+    .from(field)
+    .where(eq(field.id, field_id))
+    .limit(1);
 
-  for (const fieldId of fieldIds) {
-    const existingField = await db
-      .select({ id: field.id })
-      .from(field)
-      .where(eq(field.id, fieldId))
-      .limit(1);
-
-    if (existingField.length === 0) {
-      throw new Error(`La cancha con ID ${fieldId} no existe.`);
-    }
+  if (existingField.length === 0) {
+    throw new Error("La cancha seleccionada no existe.");
   }
 
-  // Validar formato de horas
-  for (const slot of timeSlots) {
-    if (!slot.start_time || !slot.end_time) {
-      throw new Error("Todos los horarios deben tener hora de inicio y fin.");
-    }
+  // Validar que las franjas existan
+  const slots = await db
+    .select({ id: timeslot.id })
+    .from(timeslot)
+    .where(inArray(timeslot.id, timeslot_ids));
 
-    // Validar que la hora fin sea mayor que la hora inicio
-    const start = new Date(`2000-01-01T${slot.start_time}`);
-    const end = new Date(`2000-01-01T${slot.end_time}`);
-
-    if (end <= start) {
-      throw new Error("La hora de fin debe ser mayor que la hora de inicio.");
-    }
+  if (slots.length !== timeslot_ids.length) {
+    throw new Error("Algunas franjas horarias no existen.");
   }
 
-  // Insertar usando SQL raw para evitar problemas con Drizzle
-  const insertedSlots = [];
+  // Verificar que no existan asignaciones duplicadas
+  const existingAssignments = await db
+    .select({ timeslotId: fieldTimeslot.timeslotId })
+    .from(fieldTimeslot)
+    .where(
+      and(
+        eq(fieldTimeslot.fieldId, field_id),
+        inArray(fieldTimeslot.timeslotId, timeslot_ids),
+      ),
+    );
 
-  for (const slot of timeSlots) {
-    const result = await db.execute(sql`
-      INSERT INTO timeslot (
-        id,
-        field_id,
-        user_id,
-        day_of_week,
-        start_time,
-        end_time,
-        is_active,
-        created_at,
-        updated_at
-      ) VALUES (
-        gen_random_uuid(),
-        ${slot.field_id}::uuid,
-        NULL,
-        ${slot.day_of_week}::weekday_enum,
-        ${slot.start_time}::text,
-        ${slot.end_time}::text,
-        ${slot.is_active}::boolean,
-        NOW(),
-        NOW()
-      )
-      RETURNING *
-    `);
+  if (existingAssignments.length > 0) {
+    throw new Error(
+      `${existingAssignments.length} franja(s) ya están asignadas a esta cancha.`,
+    );
+  }
 
-    if (result && Array.isArray(result)) {
-      insertedSlots.push(result[0]);
-    }
+  // Determinar precios por defecto según tipo de cancha
+  const basePrices = {
+    "futbol-6": "100000",
+    padel: "120000",
+  };
+  const instructorPrices = {
+    "futbol-6": "0", // Sin instructor para fútbol
+    padel: "50000", // $50,000 por instructor en pádel
+  };
+
+  const fieldType = existingField[0].typeField;
+  const basePriceToUse = base_price || basePrices[fieldType];
+  const instructorPriceToUse = instructor_price || instructorPrices[fieldType];
+
+  // Crear relación cancha-franja y precio
+  for (const slotId of timeslot_ids) {
+    // 1. Crear relación en field_timeslot
+    const [fieldTimeslotRecord] = await db
+      .insert(fieldTimeslot)
+      .values({
+        fieldId: field_id,
+        timeslotId: slotId,
+        isActive: true,
+      })
+      .returning();
+
+    // 2. Crear precio para esta relación
+    await db.insert(price).values({
+      fieldTimeslotId: fieldTimeslotRecord.id,
+      basePrice: basePriceToUse,
+      instructorPrice: instructorPriceToUse,
+      currency: "COP",
+      isActive: true,
+    });
   }
 
   return {
     success: true,
-    timeslots: insertedSlots,
-    message: `Se registraron ${insertedSlots.length} horarios correctamente.`,
+    message: `Se asignaron ${timeslot_ids.length} franjas horarias a la cancha correctamente.`,
+  };
+}
+
+// Desasignar franjas horarias de una cancha
+export async function unassignTimeslotsFromField(
+  fieldId: string,
+  timeslot_ids: string[],
+) {
+  if (!timeslot_ids || timeslot_ids.length === 0) {
+    throw new Error("Debes seleccionar al menos una franja horaria.");
+  }
+
+  // Eliminar relaciones field_timeslot (cascade eliminará precios)
+  await db
+    .delete(fieldTimeslot)
+    .where(
+      and(
+        eq(fieldTimeslot.fieldId, fieldId),
+        inArray(fieldTimeslot.timeslotId, timeslot_ids),
+      ),
+    );
+
+  return {
+    success: true,
+    message: `Se liberaron ${timeslot_ids.length} franjas horarias de esta cancha.`,
   };
 }

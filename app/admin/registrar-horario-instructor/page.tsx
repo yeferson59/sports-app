@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { AdminHeader } from "@/components/admin-header";
 import {
-  getActiveFields,
-  getAvailableTimeslots,
-  getFieldTimeslots,
-  assignTimeslotsToField,
-  unassignTimeslotsFromField,
+  getInstructors,
+  getAvailableTimeslotsForInstructor,
+  getInstructorTimeslots,
+  assignTimeslotsToInstructor,
+  unassignTimeslotsFromInstructor,
 } from "./action";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, User } from "lucide-react";
 
 type DayOfWeek =
   | "monday"
@@ -23,37 +23,29 @@ type DayOfWeek =
   | "saturday"
   | "sunday";
 
-interface Field {
+interface Instructor {
   id: string;
-  name: string;
-  type: string;
+  name: string | null;
+  email: string;
 }
 
 interface Timeslot {
   id: string;
-  fieldTimeslotId?: string;
   dayOfWeek: DayOfWeek;
   startTime: Date;
   endTime: Date;
-  surchargePercent?: string;
+  surchargePercent: string;
   isActive: boolean;
-  basePrice?: string | null;
-  instructorPrice?: string | null;
 }
 
-const DAYS_OPTIONS: {
-  value: DayOfWeek;
-  label: string;
-  short: string;
-  index: number;
-}[] = [
-  { value: "monday", label: "Lunes", short: "Lu", index: 0 },
-  { value: "tuesday", label: "Martes", short: "Ma", index: 1 },
-  { value: "wednesday", label: "Miércoles", short: "Mi", index: 2 },
-  { value: "thursday", label: "Jueves", short: "Ju", index: 3 },
-  { value: "friday", label: "Viernes", short: "Vi", index: 4 },
-  { value: "saturday", label: "Sábado", short: "Sa", index: 5 },
-  { value: "sunday", label: "Domingo", short: "Do", index: 6 },
+const DAYS_OPTIONS: { value: DayOfWeek; label: string; short: string }[] = [
+  { value: "monday", label: "Lunes", short: "Lu" },
+  { value: "tuesday", label: "Martes", short: "Ma" },
+  { value: "wednesday", label: "Miércoles", short: "Mi" },
+  { value: "thursday", label: "Jueves", short: "Ju" },
+  { value: "friday", label: "Viernes", short: "Vi" },
+  { value: "saturday", label: "Sábado", short: "Sa" },
+  { value: "sunday", label: "Domingo", short: "Do" },
 ];
 
 const getDayLabel = (day: DayOfWeek): string => {
@@ -62,18 +54,21 @@ const getDayLabel = (day: DayOfWeek): string => {
 
 const formatTime = (date: Date): string => {
   const d = new Date(date);
-  return `${d.getUTCHours().toString().padStart(2, "0")}:${d.getUTCMinutes().toString().padStart(2, "0")}`;
+  return `${d.getUTCHours().toString().padStart(2, "0")}:${d
+    .getUTCMinutes()
+    .toString()
+    .padStart(2, "0")}`;
 };
 
-export default function RegistrarHorarioCancha() {
-  const [fields, setFields] = useState<Field[]>([]);
-  const [selectedFieldId, setSelectedFieldId] = useState<string>("");
+export default function RegistrarHorarioInstructor() {
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [selectedInstructorId, setSelectedInstructorId] = useState<string>("");
   const [availableTimeslots, setAvailableTimeslots] = useState<Timeslot[]>([]);
-  const [fieldTimeslots, setFieldTimeslots] = useState<Timeslot[]>([]);
+  const [instructorTimeslots, setInstructorTimeslots] = useState<Timeslot[]>(
+    []
+  );
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>("monday");
   const [selectedTimeslotIds, setSelectedTimeslotIds] = useState<string[]>([]);
-  const [basePrice, setBasePrice] = useState<string>("");
-  const [instructorPrice, setInstructorPrice] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -83,14 +78,14 @@ export default function RegistrarHorarioCancha() {
   useEffect(() => {
     async function loadData() {
       try {
-        const activeFields = await getActiveFields();
-        setFields(activeFields);
+        const instructorsList = await getInstructors();
+        setInstructors(instructorsList);
 
-        if (activeFields.length > 0) {
-          setSelectedFieldId(activeFields[0].id);
+        if (instructorsList.length > 0) {
+          setSelectedInstructorId(instructorsList[0].id);
         }
       } catch (err: any) {
-        setError(err.message || "Error al cargar datos");
+        setError(err.message || "Error al cargar instructores");
       } finally {
         setLoadingData(false);
       }
@@ -100,31 +95,31 @@ export default function RegistrarHorarioCancha() {
   }, []);
 
   useEffect(() => {
-    async function loadFieldData() {
-      if (!selectedFieldId) return;
+    async function loadInstructorData() {
+      if (!selectedInstructorId) return;
 
       try {
-        const [availSlots, fieldSlots] = await Promise.all([
-          getAvailableTimeslots(selectedFieldId),
-          getFieldTimeslots(selectedFieldId),
+        const [availSlots, instrSlots] = await Promise.all([
+          getAvailableTimeslotsForInstructor(selectedInstructorId),
+          getInstructorTimeslots(selectedInstructorId),
         ]);
 
         setAvailableTimeslots(availSlots);
-        setFieldTimeslots(fieldSlots);
+        setInstructorTimeslots(instrSlots);
       } catch (err: any) {
-        console.error("Error loading field data:", err);
+        console.error("Error loading instructor data:", err);
       }
     }
 
-    loadFieldData();
-  }, [selectedFieldId]);
+    loadInstructorData();
+  }, [selectedInstructorId]);
 
   const getTimeslotsForDay = (slots: Timeslot[], day: DayOfWeek) => {
     return slots
       .filter((s) => s.dayOfWeek === day)
       .sort(
         (a, b) =>
-          new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+          new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
       );
   };
 
@@ -132,7 +127,7 @@ export default function RegistrarHorarioCancha() {
     setSelectedTimeslotIds((prev) =>
       prev.includes(timeslotId)
         ? prev.filter((id) => id !== timeslotId)
-        : [...prev, timeslotId],
+        : [...prev, timeslotId]
     );
   };
 
@@ -142,8 +137,8 @@ export default function RegistrarHorarioCancha() {
       return;
     }
 
-    if (!selectedFieldId) {
-      setError("Debes seleccionar una cancha");
+    if (!selectedInstructorId) {
+      setError("Debes seleccionar un instructor");
       return;
     }
 
@@ -152,26 +147,22 @@ export default function RegistrarHorarioCancha() {
     setError(null);
 
     try {
-      const result = await assignTimeslotsToField({
+      const result = await assignTimeslotsToInstructor({
         timeslot_ids: selectedTimeslotIds,
-        field_id: selectedFieldId,
-        base_price: basePrice || undefined,
-        instructor_price: instructorPrice || undefined,
+        instructor_id: selectedInstructorId,
       });
 
       setMessage(result.message);
       setSelectedTimeslotIds([]);
-      setBasePrice("");
-      setInstructorPrice("");
 
       // Recargar datos
-      const [availSlots, fieldSlots] = await Promise.all([
-        getAvailableTimeslots(selectedFieldId),
-        getFieldTimeslots(selectedFieldId),
+      const [availSlots, instrSlots] = await Promise.all([
+        getAvailableTimeslotsForInstructor(selectedInstructorId),
+        getInstructorTimeslots(selectedInstructorId),
       ]);
 
       setAvailableTimeslots(availSlots);
-      setFieldTimeslots(fieldSlots);
+      setInstructorTimeslots(instrSlots);
 
       setTimeout(() => setMessage(null), 5000);
     } catch (err: any) {
@@ -192,22 +183,22 @@ export default function RegistrarHorarioCancha() {
     setError(null);
 
     try {
-      const result = await unassignTimeslotsFromField(
-        selectedFieldId,
-        selectedTimeslotIds,
+      const result = await unassignTimeslotsFromInstructor(
+        selectedInstructorId,
+        selectedTimeslotIds
       );
 
       setMessage(result.message);
       setSelectedTimeslotIds([]);
 
       // Recargar datos
-      const [availSlots, fieldSlots] = await Promise.all([
-        getAvailableTimeslots(selectedFieldId),
-        getFieldTimeslots(selectedFieldId),
+      const [availSlots, instrSlots] = await Promise.all([
+        getAvailableTimeslotsForInstructor(selectedInstructorId),
+        getInstructorTimeslots(selectedInstructorId),
       ]);
 
       setAvailableTimeslots(availSlots);
-      setFieldTimeslots(fieldSlots);
+      setInstructorTimeslots(instrSlots);
 
       setTimeout(() => setMessage(null), 5000);
     } catch (err: any) {
@@ -221,20 +212,20 @@ export default function RegistrarHorarioCancha() {
     return (
       <div className="min-h-screen bg-slate-900 text-white p-8 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl mb-4">Cargando datos...</p>
+          <p className="text-xl mb-4">Cargando instructores...</p>
           <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
   }
 
-  if (fields.length === 0) {
+  if (instructors.length === 0) {
     return (
       <div className="min-h-screen bg-slate-900 text-white p-8">
-        <AdminHeader title="Asignar Horarios a Canchas" />
+        <AdminHeader title="Asignar Horarios a Instructores" />
         <div className="mt-10 text-center">
           <p className="text-xl text-slate-400">
-            No hay canchas disponibles. Por favor, registra canchas primero.
+            No hay instructores registrados. Por favor, registra instructores primero.
           </p>
         </div>
       </div>
@@ -244,43 +235,45 @@ export default function RegistrarHorarioCancha() {
   const currentDayTimeslots =
     view === "available"
       ? getTimeslotsForDay(availableTimeslots, selectedDay)
-      : getTimeslotsForDay(fieldTimeslots, selectedDay);
+      : getTimeslotsForDay(instructorTimeslots, selectedDay);
 
-  const selectedField = fields.find((f) => f.id === selectedFieldId);
+  const selectedInstructor = instructors.find(
+    (i) => i.id === selectedInstructorId
+  );
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-8">
-      <AdminHeader title="Asignar Horarios a Canchas" />
+      <AdminHeader title="Asignar Horarios a Instructores" />
 
       {message && (
         <div className="mt-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+          <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
           <p className="text-emerald-400">{message}</p>
         </div>
       )}
 
       {error && (
         <div className="mt-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <X className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+          <X className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
           <p className="text-destructive">{error}</p>
         </div>
       )}
 
-      {/* Selector de cancha */}
+      {/* Selector de instructor */}
       <div className="mt-8 max-w-5xl mx-auto">
-        <Label htmlFor="field-select">Selecciona una cancha</Label>
+        <Label htmlFor="instructor-select">Selecciona un Instructor</Label>
         <Select
-          id="field-select"
-          value={selectedFieldId}
+          id="instructor-select"
+          value={selectedInstructorId}
           onChange={(e) => {
-            setSelectedFieldId(e.target.value);
+            setSelectedInstructorId(e.target.value);
             setSelectedTimeslotIds([]);
           }}
           className="mt-2"
         >
-          {fields.map((field) => (
-            <option key={field.id} value={field.id}>
-              {field.name} ({field.type})
+          {instructors.map((instructor) => (
+            <option key={instructor.id} value={instructor.id}>
+              {instructor.name || instructor.email}
             </option>
           ))}
         </Select>
@@ -313,7 +306,8 @@ export default function RegistrarHorarioCancha() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            ✅ Franjas de {selectedField?.name} ({fieldTimeslots.length})
+            ✅ Horarios de {selectedInstructor?.name} (
+            {instructorTimeslots.length})
           </button>
         </div>
       </div>
@@ -326,7 +320,7 @@ export default function RegistrarHorarioCancha() {
             const daySlots =
               view === "available"
                 ? getTimeslotsForDay(availableTimeslots, day.value)
-                : getTimeslotsForDay(fieldTimeslots, day.value);
+                : getTimeslotsForDay(instructorTimeslots, day.value);
 
             return (
               <button
@@ -339,8 +333,8 @@ export default function RegistrarHorarioCancha() {
                   selectedDay === day.value
                     ? "bg-emerald-500 text-white"
                     : daySlots.length > 0
-                      ? "bg-slate-800 text-white hover:bg-slate-700"
-                      : "bg-slate-800/30 text-slate-500 cursor-not-allowed"
+                    ? "bg-slate-800 text-white hover:bg-slate-700"
+                    : "bg-slate-800/30 text-slate-500 cursor-not-allowed"
                 }`}
                 disabled={daySlots.length === 0}
               >
@@ -360,14 +354,14 @@ export default function RegistrarHorarioCancha() {
             {getDayLabel(selectedDay)} -{" "}
             {view === "available"
               ? "Franjas Disponibles"
-              : `Franjas de ${selectedField?.name}`}
+              : `Horarios de ${selectedInstructor?.name}`}
           </h3>
 
           {currentDayTimeslots.length === 0 ? (
             <p className="text-slate-400 text-center py-8">
               {view === "available"
                 ? "No hay franjas horarias disponibles para este día"
-                : "Esta cancha no tiene franjas asignadas para este día"}
+                : "Este instructor no tiene franjas asignadas para este día"}
             </p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -389,11 +383,6 @@ export default function RegistrarHorarioCancha() {
                     <div className="text-xs text-slate-400">
                       {formatTime(slot.endTime)}
                     </div>
-                    {!slot.isActive && (
-                      <div className="text-xs text-orange-400 mt-1">
-                        Inactiva
-                      </div>
-                    )}
                   </button>
                 );
               })}
@@ -402,77 +391,30 @@ export default function RegistrarHorarioCancha() {
 
           {/* Botones de acción */}
           {currentDayTimeslots.length > 0 && (
-            <div className="mt-6 space-y-4">
-              {view === "available" && selectedTimeslotIds.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="base-price-input">
-                      Precio Base (Opcional)
-                    </Label>
-                    <input
-                      id="base-price-input"
-                      type="number"
-                      placeholder="Ej: 100000"
-                      value={basePrice}
-                      onChange={(e) => setBasePrice(e.target.value)}
-                      className="px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
-                    />
-                    <p className="text-xs text-slate-400">
-                      Por defecto: Fútbol 6 = $100,000 | Pádel = $120,000
-                    </p>
-                  </div>
-
-                  {selectedField?.type === "padel" && (
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="instructor-price-input">
-                        Precio Instructor (Opcional - Solo Pádel)
-                      </Label>
-                      <input
-                        id="instructor-price-input"
-                        type="number"
-                        placeholder="Ej: 50000"
-                        value={instructorPrice}
-                        onChange={(e) => setInstructorPrice(e.target.value)}
-                        className="px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
-                      />
-                      <p className="text-xs text-slate-400">
-                        Por defecto: $50,000 COP
-                      </p>
-                    </div>
-                  )}
-
-                  <p className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded">
-                    💡 Las franjas después de las 5 PM tienen un sobrecargo del
-                    2% automático
-                  </p>
+            <div className="mt-6 flex gap-3 justify-end">
+              {selectedTimeslotIds.length > 0 && (
+                <div className="text-sm text-slate-300 flex items-center">
+                  {selectedTimeslotIds.length} franja(s) seleccionada(s)
                 </div>
               )}
-
-              <div className="flex gap-3 justify-end items-center">
-                {selectedTimeslotIds.length > 0 && (
-                  <div className="text-sm text-slate-300 flex items-center">
-                    {selectedTimeslotIds.length} franja(s) seleccionada(s)
-                  </div>
-                )}
-                {view === "available" ? (
-                  <Button
-                    onClick={handleAssignTimeslots}
-                    disabled={loading || selectedTimeslotIds.length === 0}
-                  >
-                    {loading
-                      ? "Asignando..."
-                      : `Asignar a ${selectedField?.name}`}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleUnassignTimeslots}
-                    disabled={loading || selectedTimeslotIds.length === 0}
-                    variant="destructive"
-                  >
-                    {loading ? "Liberando..." : "Liberar Franjas"}
-                  </Button>
-                )}
-              </div>
+              {view === "available" ? (
+                <Button
+                  onClick={handleAssignTimeslots}
+                  disabled={loading || selectedTimeslotIds.length === 0}
+                >
+                  {loading
+                    ? "Asignando..."
+                    : `Asignar a ${selectedInstructor?.name}`}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleUnassignTimeslots}
+                  disabled={loading || selectedTimeslotIds.length === 0}
+                  variant="destructive"
+                >
+                  {loading ? "Liberando..." : "Liberar Franjas"}
+                </Button>
+              )}
             </div>
           )}
         </div>
