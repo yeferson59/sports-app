@@ -26,6 +26,9 @@ export default function HomeAdminPage() {
           <Link href="/admin/registrar-horario-cancha">
             <Button variant="default">Registrar horarios</Button>
           </Link>
+          <Link href="/admin/registrar-horario-instructor">
+            <Button variant="default">Registrar horarios instructor</Button>
+          </Link>
           <Link href="/admin/deshabilitar-cancha">
             <Button variant="destructive">Deshabilitar cancha</Button>
           </Link>
