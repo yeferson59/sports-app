@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getFullAvailability } from "./action";
-import { AdminHeader } from "@/components/admin-header";
+import { CustomerHeader } from "@/components/customer-header";
+import { Button } from "@/components/ui/button";
 
 interface TimeSlot {
   id: string;
@@ -59,15 +61,26 @@ export default function DisponibilidadCanchas() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8 flex justify-center items-center">
+      <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white flex justify-center items-center">
         <p className="text-xl">Cargando disponibilidad...</p>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
-      <AdminHeader title="Disponibilidad de Canchas" />
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
+      <CustomerHeader>
+        <Link href="/customer">
+          <Button variant="outline">← Volver</Button>
+        </Link>
+      </CustomerHeader>
+
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Header */}
+        <header className="mb-10">
+          <h1 className="text-4xl font-bold mb-2">Disponibilidad de Canchas</h1>
+          <p className="text-slate-300">Consulta los horarios disponibles de todas nuestras canchas</p>
+        </header>
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mt-10">
         {fields.map((field, index) => (
@@ -109,6 +122,7 @@ export default function DisponibilidadCanchas() {
           </div>
         ))}
       </section>
-    </div>
+      </div>
+    </main>
   );
 }

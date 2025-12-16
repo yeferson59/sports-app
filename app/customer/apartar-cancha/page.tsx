@@ -1,14 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CustomerHeader } from "@/components/customer-header";
 import { getActiveFields, getAvailableSlots, createBooking, getAvailableInstructorsForSlot } from "./action";
-import { ChevronDown, ChevronUp, Check, X, Calendar, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, Clock, Check } from "lucide-react";
 
 type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
@@ -293,27 +296,31 @@ export default function ApartarCancha() {
   const currentField = fields.find(f => f.id === selectedField);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
+      <CustomerHeader>
+        <Link href="/customer">
+          <Button variant="outline">← Volver</Button>
+        </Link>
+      </CustomerHeader>
+
+      <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
-        <header className="mb-8">
+        <header className="mb-10">
           <h1 className="text-4xl font-bold mb-2">Apartar Cancha</h1>
           <p className="text-slate-300">Selecciona una cancha, elige un día y reserva tu horario</p>
         </header>
 
         {/* Mensajes */}
         {message && (
-          <div className="mb-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-start gap-3">
-            <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-            <p className="text-emerald-400">{message}</p>
-          </div>
+          <Alert variant="success" className="mb-6">
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
         )}
         
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 flex items-start gap-3">
-            <X className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-            <p className="text-destructive">{error}</p>
-          </div>
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         {/* Seleccionar Cancha */}
@@ -547,6 +554,6 @@ export default function ApartarCancha() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
