@@ -25,7 +25,7 @@ export default function RegisterInstructorPage() {
     const firstName = form.get("firstName") as string;
     const lastName = form.get("lastName") as string;
     const email = form.get("email") as string;
-    const phone = form.get("phone") as string | null;
+    const phone = form.get("phone") as string;
     const sport = form.get("sport") as string;
     const password = form.get("password") as string;
     const confirmPassword = form.get("confirmPassword") as string;
@@ -41,7 +41,8 @@ export default function RegisterInstructorPage() {
         firstName,
         lastName,
         email,
-        phone: phone ?? undefined,
+        password,
+        phone: phone,
         sport,
       });
 
@@ -65,7 +66,10 @@ export default function RegisterInstructorPage() {
           className="w-full max-w-md rounded-2xl bg-slate-800/40 border border-white/10 p-8 shadow-xl backdrop-blur-sm"
         >
           <header className="mb-6">
-            <h1 id="register-instructor-heading" className="text-3xl font-bold text-white">
+            <h1
+              id="register-instructor-heading"
+              className="text-3xl font-bold text-white"
+            >
               Registrar Instructor
             </h1>
             <p className="mt-2 text-sm text-slate-300">
@@ -88,34 +92,65 @@ export default function RegisterInstructorPage() {
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="firstName" required>Nombre</Label>
-                <Input id="firstName" name="firstName" type="text" placeholder="Nombre" className="mt-2" required />
+                <Label htmlFor="firstName" required>
+                  Nombre
+                </Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  placeholder="Nombre"
+                  className="mt-2"
+                  required
+                />
               </div>
 
               <div>
-                <Label htmlFor="lastName" required>Apellido</Label>
-                <Input id="lastName" name="lastName" type="text" placeholder="Apellido" className="mt-2" required />
+                <Label htmlFor="lastName" required>
+                  Apellido
+                </Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  placeholder="Apellido"
+                  className="mt-2"
+                  required
+                />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="email" required>Correo</Label>
-              <Input id="email" name="email" type="email" placeholder="correo@ejemplo.com" className="mt-2" required />
+              <Label htmlFor="email" required>
+                Correo
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="correo@ejemplo.com"
+                className="mt-2"
+                required
+              />
             </div>
 
             <div>
               <Label htmlFor="phone">Teléfono</Label>
-              <Input id="phone" name="phone" type="tel" placeholder="+54 9 11 1234 5678" className="mt-2" />
+              <Input
+                id="phone"
+                name="phone"
+                required
+                type="tel"
+                placeholder="3201754332"
+                className="mt-2"
+              />
             </div>
 
             <div>
-              <Label htmlFor="sport" required>Disciplina</Label>
-              <Select
-                id="sport"
-                name="sport"
-                required
-                className="mt-2"
-              >
+              <Label htmlFor="sport" required>
+                Disciplina
+              </Label>
+              <Select id="sport" name="sport" required className="mt-2">
                 <option value="">Selecciona una disciplina</option>
                 <option value="padel">Pádel</option>
               </Select>
@@ -123,17 +158,40 @@ export default function RegisterInstructorPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="password" required>Contraseña</Label>
-                <Input id="password" name="password" type="password" placeholder="••••••••" className="mt-2" required />
+                <Label htmlFor="password" required>
+                  Contraseña
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="mt-2"
+                  required
+                />
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword" required>Confirmar contraseña</Label>
-                <Input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" className="mt-2" required />
+                <Label htmlFor="confirmPassword" required>
+                  Confirmar contraseña
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  className="mt-2"
+                  required
+                />
               </div>
             </div>
 
-             <Button type="submit" size="lg" className="w-full mt-2" disabled={loading}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full mt-2"
+              disabled={loading}
+            >
               {loading ? "Registrando..." : "Registrar Instructor"}
             </Button>
           </form>
