@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdminHeader } from "@/components/admin-header";
 import {
   getInstructors,
@@ -100,7 +101,7 @@ export default function RegistrarHorarioInstructor() {
 
       try {
         const [availSlots, instrSlots] = await Promise.all([
-          getAvailableTimeslotsForInstructor(selectedInstructorId),
+          getAvailableTimeslotsForInstructor(),
           getInstructorTimeslots(selectedInstructorId),
         ]);
 
@@ -157,7 +158,7 @@ export default function RegistrarHorarioInstructor() {
 
       // Recargar datos
       const [availSlots, instrSlots] = await Promise.all([
-        getAvailableTimeslotsForInstructor(selectedInstructorId),
+        getAvailableTimeslotsForInstructor(),
         getInstructorTimeslots(selectedInstructorId),
       ]);
 
@@ -193,7 +194,7 @@ export default function RegistrarHorarioInstructor() {
 
       // Recargar datos
       const [availSlots, instrSlots] = await Promise.all([
-        getAvailableTimeslotsForInstructor(selectedInstructorId),
+        getAvailableTimeslotsForInstructor(),
         getInstructorTimeslots(selectedInstructorId),
       ]);
 
@@ -210,7 +211,7 @@ export default function RegistrarHorarioInstructor() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8 flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl mb-4">Cargando instructores...</p>
           <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
@@ -221,7 +222,7 @@ export default function RegistrarHorarioInstructor() {
 
   if (instructors.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8">
+      <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8">
         <AdminHeader title="Asignar Horarios a Instructores" />
         <div className="mt-10 text-center">
           <p className="text-xl text-slate-400">
@@ -242,21 +243,19 @@ export default function RegistrarHorarioInstructor() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8">
       <AdminHeader title="Asignar Horarios a Instructores" />
 
       {message && (
-        <div className="mt-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-          <p className="text-emerald-400">{message}</p>
-        </div>
+        <Alert variant="success" className="mt-6 max-w-5xl mx-auto">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div className="mt-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <X className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-          <p className="text-destructive">{error}</p>
-        </div>
+        <Alert variant="destructive" className="mt-6 max-w-5xl mx-auto">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Selector de instructor */}

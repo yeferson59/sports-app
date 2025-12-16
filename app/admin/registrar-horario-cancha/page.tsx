@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdminHeader } from "@/components/admin-header";
 import {
   getActiveFields,
@@ -253,17 +255,15 @@ export default function RegistrarHorarioCancha() {
       <AdminHeader title="Asignar Horarios a Canchas" />
 
       {message && (
-        <div className="mt-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-          <p className="text-emerald-400">{message}</p>
-        </div>
+        <Alert variant="success" className="mt-6 max-w-5xl mx-auto">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
       )}
 
       {error && (
-        <div className="mt-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 flex items-start gap-3 max-w-5xl mx-auto">
-          <X className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-          <p className="text-destructive">{error}</p>
-        </div>
+        <Alert variant="destructive" className="mt-6 max-w-5xl mx-auto">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Selector de cancha */}
@@ -409,13 +409,13 @@ export default function RegistrarHorarioCancha() {
                     <Label htmlFor="base-price-input">
                       Precio Base (Opcional)
                     </Label>
-                    <input
+                    <Input
                       id="base-price-input"
                       type="number"
                       placeholder="Ej: 100000"
                       value={basePrice}
                       onChange={(e) => setBasePrice(e.target.value)}
-                      className="px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                      className="mt-0"
                     />
                     <p className="text-xs text-slate-400">
                       Por defecto: Fútbol 6 = $100,000 | Pádel = $120,000
@@ -427,13 +427,13 @@ export default function RegistrarHorarioCancha() {
                       <Label htmlFor="instructor-price-input">
                         Precio Instructor (Opcional - Solo Pádel)
                       </Label>
-                      <input
+                      <Input
                         id="instructor-price-input"
                         type="number"
                         placeholder="Ej: 50000"
                         value={instructorPrice}
                         onChange={(e) => setInstructorPrice(e.target.value)}
-                        className="px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                        className="mt-0"
                       />
                       <p className="text-xs text-slate-400">
                         Por defecto: $50,000 COP

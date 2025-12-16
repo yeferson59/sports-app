@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdminHeader } from "@/components/admin-header";
 import { getAllFields, disableField, enableField } from "./action";
 
@@ -79,7 +80,7 @@ export default function DeshabilitarCanchaPage() {
 
   if (loadingFields) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8 flex items-center justify-center">
         <p className="text-xl">Cargando canchas...</p>
       </div>
     );
@@ -87,7 +88,7 @@ export default function DeshabilitarCanchaPage() {
 
   if (fields.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8">
+      <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8">
         <AdminHeader title="Gestionar Canchas" />
         <div className="mt-10 text-center">
           <p className="text-xl text-slate-400">
@@ -99,19 +100,19 @@ export default function DeshabilitarCanchaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white p-8">
       <AdminHeader title="Gestionar Canchas" />
 
       {/* Mensajes */}
       {message && (
-        <div className="mt-6 p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/50 max-w-2xl mx-auto">
-          <p className="text-emerald-400 text-center">{message}</p>
-        </div>
+        <Alert variant="success" className="mt-6 max-w-2xl mx-auto">
+          <AlertDescription className="text-center">{message}</AlertDescription>
+        </Alert>
       )}
       {error && (
-        <div className="mt-6 p-4 rounded-lg bg-destructive/20 border border-destructive/50 max-w-2xl mx-auto">
-          <p className="text-destructive text-center">{error}</p>
-        </div>
+        <Alert variant="destructive" className="mt-6 max-w-2xl mx-auto">
+          <AlertDescription className="text-center">{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Información */}

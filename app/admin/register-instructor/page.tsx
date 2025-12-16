@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdminHeader } from "@/components/admin-header";
 import { useState } from "react";
-//importat acción de registro de instructor
 import { registerInstructor } from "./action";
 
 export default function RegisterInstructorPage() {
@@ -75,14 +75,14 @@ export default function RegisterInstructorPage() {
 
           {/* Mensajes */}
           {message && (
-            <div className="mb-4 p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/50">
-              <p className="text-emerald-400">{message}</p>
-            </div>
+            <Alert variant="success" className="mb-4">
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
           )}
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-destructive/20 border border-destructive/50">
-              <p className="text-destructive">{error}</p>
-            </div>
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
