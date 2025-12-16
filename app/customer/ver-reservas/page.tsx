@@ -7,23 +7,23 @@ import Image from "next/image";
 
 interface Booking {
   id: string;
-  field_id: string;
+  fieldId: string;
   field_name: string | null;
-  field_type: string | null;
-  with_instructor: boolean;
-  instructor_id: string | null;
+  field_type: "futbol-6" | "padel" | null;
+  withInstructor: boolean;
+  instructorId: string | null;
   instructor_name: string | null;
-  timeslot_id: string | null;
+  timeslotId: string | null;
   day_of_week: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  base_price_snapshot: string; // numeric se devuelve como string
-  surcharge_snapshot: string; // numeric se devuelve como string
-  instructor_price_snapshot: string; // numeric se devuelve como string
-  total_price: string; // numeric se devuelve como string
+  start_time: Date | null;
+  end_time: Date | null;
+  basePriceSnapshot: string;
+  surchargeSnapshot: string;
+  instructorPriceSnapshot: string;
+  totalPrice: string;
   currency: string;
   status: string;
-  created_at: Date;
+  createdAt: Date;
 }
 
 const DAY_NAMES: Record<string, string> = {
@@ -41,6 +41,14 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   confirmed: { label: "Confirmada", color: "bg-green-500/20 text-green-400 border-green-500/50" },
   cancelled: { label: "Cancelada", color: "bg-red-500/20 text-red-400 border-red-500/50" },
   completed: { label: "Completada", color: "bg-blue-500/20 text-blue-400 border-blue-500/50" },
+};
+
+const formatTime = (date: Date | null): string => {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export default function VerReservasPage() {
@@ -147,7 +155,9 @@ export default function VerReservasPage() {
                 <div className="p-6 space-y-4">
                   <div>
                     <h3 className="text-2xl font-bold">{booking.field_name}</h3>
-                    <p className="text-sm text-slate-400 capitalize">{booking.field_type}</p>
+                    <p className="text-sm text-slate-400 capitalize">
+                      {booking.field_type?.replace("-", " ")}
+                    </p>
                   </div>
 
                   <div className="space-y-2 text-sm">
@@ -158,10 +168,10 @@ export default function VerReservasPage() {
                     <div className="flex justify-between">
                       <span className="text-slate-400">Horario:</span>
                       <span className="font-semibold">
-                        {booking.start_time} - {booking.end_time}
+                        {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                       </span>
                     </div>
-                    {booking.with_instructor && (
+                    {booking.withInstructor && (
                       <div className="flex justify-between">
                         <span className="text-slate-400">Instructor:</span>
                         <span className="font-semibold">{booking.instructor_name || "N/A"}</span>
@@ -172,24 +182,24 @@ export default function VerReservasPage() {
                   <div className="border-t border-white/10 pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">Precio base:</span>
-                      <span>${Number(booking.base_price_snapshot).toFixed(2)}</span>
+                      <span>${Number(booking.basePriceSnapshot).toFixed(2)}</span>
                     </div>
-                    {Number(booking.surcharge_snapshot) > 0 && (
+                    {Number(booking.surchargeSnapshot) > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-400">Recargo:</span>
-                        <span>${Number(booking.surcharge_snapshot).toFixed(2)}</span>
+                        <span>${Number(booking.surchargeSnapshot).toFixed(2)}</span>
                       </div>
                     )}
-                    {booking.with_instructor && (
+                    {booking.withInstructor && (
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-400">Instructor:</span>
-                        <span>${Number(booking.instructor_price_snapshot).toFixed(2)}</span>
+                        <span>${Number(booking.instructorPriceSnapshot).toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-lg font-bold border-t border-white/10 pt-2">
                       <span>Total:</span>
                       <span className="text-cyan-400">
-                        ${Number(booking.total_price).toFixed(2)} {booking.currency}
+                        ${Number(booking.totalPrice).toFixed(2)} {booking.currency}
                       </span>
                     </div>
                   </div>
@@ -205,7 +215,7 @@ export default function VerReservasPage() {
                   )}
 
                   <p className="text-xs text-slate-500 text-center">
-                    Reservado el {new Date(booking.created_at).toLocaleDateString("es-ES")}
+                    Reservado el {new Date(booking.createdAt).toLocaleDateString("es-ES")}
                   </p>
                 </div>
               </div>

@@ -1,7 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { booking, field, user, timeslot } from "@/auth-schema";
+import { booking, field, timeslot } from "@/app-schema";
+import { user } from "@/auth-schema";
 import { eq, desc } from "drizzle-orm";
 import { authClient } from "@/lib/auth-client";
 import { headers } from "next/headers";
@@ -25,30 +26,30 @@ export async function getUserBookings() {
   const userBookings = await db
     .select({
       id: booking.id,
-      field_id: booking.field_id,
+      fieldId: booking.fieldId,
       field_name: field.name,
-      field_type: field.type,
-      with_instructor: booking.with_instructor,
-      instructor_id: booking.instructor_id,
+      field_type: field.typeField,
+      withInstructor: booking.withInstructor,
+      instructorId: booking.instructorId,
       instructor_name: user.name,
-      timeslot_id: booking.timeslot_id,
-      day_of_week: timeslot.day_of_week,
-      start_time: timeslot.start_time,
-      end_time: timeslot.end_time,
-      base_price_snapshot: booking.base_price_snapshot,
-      surcharge_snapshot: booking.surcharge_snapshot,
-      instructor_price_snapshot: booking.instructor_price_snapshot,
-      total_price: booking.total_price,
+      timeslotId: booking.timeslotId,
+      day_of_week: timeslot.dayOfWeek,
+      start_time: timeslot.startTime,
+      end_time: timeslot.endTime,
+      basePriceSnapshot: booking.basePriceSnapshot,
+      surchargeSnapshot: booking.surchargeSnapshot,
+      instructorPriceSnapshot: booking.instructorPriceSnapshot,
+      totalPrice: booking.totalPrice,
       currency: booking.currency,
       status: booking.status,
-      created_at: booking.created_at,
+      createdAt: booking.createdAt,
     })
     .from(booking)
-    .leftJoin(field, eq(booking.field_id, field.id))
-    .leftJoin(user, eq(booking.instructor_id, user.id))
-    .leftJoin(timeslot, eq(booking.timeslot_id, timeslot.id))
-    .where(eq(booking.user_id, userId))
-    .orderBy(desc(booking.created_at));
+    .leftJoin(field, eq(booking.fieldId, field.id))
+    .leftJoin(user, eq(booking.instructorId, user.id))
+    .leftJoin(timeslot, eq(booking.timeslotId, timeslot.id))
+    .where(eq(booking.userId, userId))
+    .orderBy(desc(booking.createdAt));
 
   return userBookings;
 }
@@ -79,7 +80,7 @@ export async function cancelBooking(bookingId: string) {
     throw new Error("La reserva no existe");
   }
 
-  if (existingBooking[0].user_id !== userId) {
+  if (existingBooking[0].userId !== userId) {
     throw new Error("No tienes permiso para cancelar esta reserva");
   }
 
@@ -92,7 +93,7 @@ export async function cancelBooking(bookingId: string) {
     .update(booking)
     .set({
       status: "cancelled",
-      updated_at: new Date(),
+      updatedAt: new Date(),
     })
     .where(eq(booking.id, bookingId))
     .returning();
