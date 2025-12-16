@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin-header";
 
 export default function HomeAdminPage() {
@@ -44,7 +44,7 @@ export default function HomeAdminPage() {
       {/* CONTENIDO 2 */}
       <section className="w-full mt-8">
         {/* TARJETA 2 */}
-        <Card className="h-[400px] overflow-hidden">
+        <Card className="h-100 overflow-hidden">
           <Image
             src="/clubplay.png"
             alt="Club Padel y Fútbol"
