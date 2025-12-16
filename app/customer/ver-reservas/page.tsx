@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getUserBookings, cancelBooking } from "./action";
 import Image from "next/image";
+import { CustomerHeader } from "@/components/customer-header";
 
 interface Booking {
   id: string;
@@ -95,19 +97,36 @@ export default function VerReservasPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8 flex items-center justify-center">
-        <p className="text-xl">Cargando tus reservas...</p>
-      </div>
+      <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
+        <CustomerHeader>
+          <Link href="/customer">
+            <Button variant="outline">← Volver</Button>
+          </Link>
+        </CustomerHeader>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-xl mb-4">Cargando tus reservas...</p>
+            <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
+          </div>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
+    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
+      <CustomerHeader>
+        <Link href="/customer">
+          <Button variant="outline">← Volver</Button>
+        </Link>
+      </CustomerHeader>
+
+      <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Header */}
-      <div className="bg-slate-800/40 rounded-2xl border border-white/10 p-6 shadow-xl backdrop-blur-sm mb-8">
-        <h1 className="text-3xl font-bold">Mis Reservas</h1>
-        <p className="text-slate-300 mt-2">Gestiona todas tus reservas de canchas</p>
-      </div>
+      <header className="mb-10">
+        <h1 className="text-4xl font-bold">Mis Reservas</h1>
+        <p className="mt-2 text-slate-300 text-lg">Gestiona todas tus reservas de canchas</p>
+      </header>
 
       {/* Mensajes */}
       {message && (
@@ -224,5 +243,6 @@ export default function VerReservasPage() {
         </div>
       )}
     </div>
+    </main>
   );
 }
