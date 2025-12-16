@@ -93,7 +93,7 @@ export default function CustomerHomePage() {
           </Link>
 
           {/* Mis reservas */}
-          <Link href="/">
+          <Link href="/customer/ver-reservas">
             <div className="group cursor-pointer p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-300/50 backdrop-blur-md transition-all hover:shadow-lg">
               <h2 className="text-2xl font-semibold flex items-center gap-2">
                  Mis reservas
