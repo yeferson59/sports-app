@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 
+export const dynamic = "force-dynamic"
+
 type UserMenuProps = {
   user?: {
     name?: string | null;
