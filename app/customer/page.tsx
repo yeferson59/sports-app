@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CustomerHeader } from "@/components/customer-header";
 
@@ -9,11 +8,7 @@ export default function CustomerHomePage() {
   return (
     <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white">
       {/* NAVBAR */}
-      <CustomerHeader>
-        <Button variant="destructive">
-          Cerrar sesión
-        </Button>
-      </CustomerHeader>
+      <CustomerHeader />
 
       {/* CONTENIDO PRINCIPAL */}
       <section className="max-w-4xl mx-auto px-6 py-12">
