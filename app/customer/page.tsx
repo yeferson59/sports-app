@@ -48,23 +48,13 @@ export default function CustomerHomePage() {
             </Card>
           </Link>
 
-          {/* Cancelar cancha */}
-          <Link href="/">
-            <Card className="group cursor-pointer hover:border-destructive/50 transition-all hover:shadow-lg h-full">
-              <CardHeader>
-                <CardTitle>Cancelar reserva</CardTitle>
-                <CardDescription>Cancela una reserva activa.</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-
           {/* Mis reservas */}
           <Link href="/customer/ver-reservas">
             <Card className="group cursor-pointer hover:border-emerald-300/50 transition-all hover:shadow-lg h-full">
               <CardHeader>
                 <CardTitle>Mis reservas</CardTitle>
                 <CardDescription>
-                  Consulta tu historial y próximas reservas.
+                  Consulta, gestiona y cancela tus reservas.
                 </CardDescription>
               </CardHeader>
             </Card>
