@@ -45,11 +45,11 @@ export async function getUserBookings() {
       createdAt: booking.createdAt,
     })
     .from(booking)
-    .leftJoin(field, eq(booking.fieldId, field.id))
+    .innerJoin(field, eq(booking.fieldId, field.id))
     .leftJoin(user, eq(booking.instructorId, user.id))
     .leftJoin(timeslot, eq(booking.timeslotId, timeslot.id))
     .where(eq(booking.userId, userId))
-    .orderBy(desc(booking.createdAt));
+    .orderBy(desc(booking.createdAt))
 
   return userBookings;
 }

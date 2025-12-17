@@ -163,12 +163,13 @@ export async function createBooking(
 
     // Calcular precio total
     const basePrice = parseFloat(slot.basePrice);
-    const surcharge = parseFloat(slot.surchargePercent);
+    const surchargePercent = parseFloat(slot.surchargePercent);
     const instructorPrice = withInstructor
       ? parseFloat(slot.instructorPrice)
       : 0;
 
-    const priceWithSurcharge = basePrice * (1 + surcharge / 100);
+    const surchargeAmount = basePrice * (surchargePercent / 100);
+    const priceWithSurcharge = basePrice + surchargeAmount;
     const totalPrice = priceWithSurcharge + instructorPrice;
 
     // Validar que el instructor esté disponible para esta franja si se solicita
@@ -198,7 +199,7 @@ export async function createBooking(
         fieldTimeslotId: slot.fieldTimeslotId,
         instructorId: withInstructor && instructorId ? instructorId : null,
         basePriceSnapshot: slot.basePrice,
-        surchargeSnapshot: slot.surchargePercent,
+        surchargeSnapshot: surchargeAmount.toString(),
         instructorPriceSnapshot: instructorPrice.toString(),
         totalPrice: totalPrice.toString(),
         currency: slot.currency,

@@ -53,6 +53,56 @@ const formatTime = (date: Date | null): string => {
   });
 };
 
+interface GroupedBooking extends Booking {
+  slots: Booking[];
+}
+
+const groupConsecutiveBookings = (bookings: Booking[]): GroupedBooking[] => {
+  const sortedBookings = [...bookings].sort((a, b) => {
+    const aTime = new Date(a.start_time || 0).getTime();
+    const bTime = new Date(b.start_time || 0).getTime();
+    return aTime - bTime;
+  });
+
+  const grouped: GroupedBooking[] = [];
+
+  for (const booking of sortedBookings) {
+    const lastGroup = grouped[grouped.length - 1];
+    const bookingStart = new Date(booking.start_time || 0).getTime();
+    const lastGroupEnd = lastGroup
+      ? new Date(lastGroup.end_time || 0).getTime()
+      : null;
+
+    if (
+      lastGroup &&
+      lastGroup.fieldId === booking.fieldId &&
+      lastGroup.day_of_week === booking.day_of_week &&
+      lastGroupEnd === bookingStart
+    ) {
+      lastGroup.slots.push(booking);
+      lastGroup.end_time = booking.end_time;
+      lastGroup.totalPrice = (
+        parseFloat(lastGroup.totalPrice) + parseFloat(booking.totalPrice)
+      ).toString();
+      lastGroup.surchargeSnapshot = (
+        parseFloat(lastGroup.surchargeSnapshot) +
+        parseFloat(booking.surchargeSnapshot)
+      ).toString();
+      lastGroup.instructorPriceSnapshot = (
+        parseFloat(lastGroup.instructorPriceSnapshot) +
+        parseFloat(booking.instructorPriceSnapshot)
+      ).toString();
+    } else {
+      grouped.push({
+        ...booking,
+        slots: [booking],
+      });
+    }
+  }
+
+  return grouped;
+};
+
 export default function VerReservasPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,18 +125,24 @@ export default function VerReservasPage() {
     loadBookings();
   }, []);
 
-  const handleCancel = async (bookingId: string) => {
-    if (!confirm("¿Estás seguro de que deseas cancelar esta reserva?")) {
+  const handleCancel = async (groupedBooking: GroupedBooking) => {
+    const message = groupedBooking.slots.length > 1 
+      ? `¿Estás seguro de que deseas cancelar estas ${groupedBooking.slots.length} franjas horarias?`
+      : "¿Estás seguro de que deseas cancelar esta reserva?";
+    
+    if (!confirm(message)) {
       return;
     }
 
-    setCancellingId(bookingId);
+    setCancellingId(groupedBooking.id);
     setMessage(null);
     setError(null);
 
     try {
-      const result = await cancelBooking(bookingId);
-      setMessage(result.message);
+      for (const slot of groupedBooking.slots) {
+        await cancelBooking(slot.id);
+      }
+      setMessage(`${groupedBooking.slots.length === 1 ? "Reserva" : `${groupedBooking.slots.length} franjas`} cancelada${groupedBooking.slots.length > 1 ? "s" : ""} correctamente`);
       await loadBookings();
     } catch (err: any) {
       setError(err.message || "Error al cancelar la reserva");
@@ -148,19 +204,20 @@ export default function VerReservasPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {bookings.map((booking) => {
-            const statusInfo = STATUS_LABELS[booking.status] || STATUS_LABELS.pending;
-            const fieldImage = booking.field_type === "padel" ? "/cancha3.png" : "/cancha1.png";
+          {groupConsecutiveBookings(bookings).map((groupedBooking) => {
+            const statusInfo = STATUS_LABELS[groupedBooking.status] || STATUS_LABELS.pending;
+            const fieldImage = groupedBooking.field_type === "padel" ? "/cancha3.png" : "/cancha1.png";
+            const isGrouped = groupedBooking.slots.length > 1;
 
             return (
               <div
-                key={booking.id}
+                key={groupedBooking.id}
                 className="bg-slate-800/40 rounded-xl border border-white/10 shadow-xl backdrop-blur-sm overflow-hidden"
               >
                 <div className="relative h-48">
                   <Image
                     src={fieldImage}
-                    alt={booking.field_name || "Cancha"}
+                    alt={groupedBooking.field_name || "Cancha"}
                     fill
                     className="object-cover"
                   />
@@ -173,68 +230,112 @@ export default function VerReservasPage() {
 
                 <div className="p-6 space-y-4">
                   <div>
-                    <h3 className="text-2xl font-bold">{booking.field_name}</h3>
+                    <h3 className="text-2xl font-bold">{groupedBooking.field_name}</h3>
                     <p className="text-sm text-slate-400 capitalize">
-                      {booking.field_type?.replace("-", " ")}
+                      {groupedBooking.field_type?.replace("-", " ")}
                     </p>
+                    {isGrouped && (
+                      <p className="text-xs text-emerald-400 mt-1">📦 {groupedBooking.slots.length} franjas agrupadas</p>
+                    )}
                   </div>
 
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Día:</span>
-                      <span className="font-semibold">{DAY_NAMES[booking.day_of_week || ""] || "N/A"}</span>
+                      <span className="font-semibold">{DAY_NAMES[groupedBooking.day_of_week || ""] || "N/A"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Horario:</span>
                       <span className="font-semibold">
-                        {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                        {formatTime(groupedBooking.start_time)} - {formatTime(groupedBooking.end_time)}
                       </span>
                     </div>
-                    {booking.withInstructor && (
+                    {isGrouped && (
+                      <div className="space-y-1 mt-2 p-2 bg-slate-900/50 rounded">
+                        <p className="text-slate-400 text-xs">Franjas incluidas:</p>
+                        {groupedBooking.slots.map((slot, idx) => (
+                          <p key={`${slot.id}-${idx}`} className="text-xs text-slate-300">
+                            {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {groupedBooking.withInstructor && (
                       <div className="flex justify-between">
                         <span className="text-slate-400">Instructor:</span>
-                        <span className="font-semibold">{booking.instructor_name || "N/A"}</span>
+                        <span className="font-semibold">{groupedBooking.instructor_name || "N/A"}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="border-t border-white/10 pt-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Precio base:</span>
-                      <span>${Number(booking.basePriceSnapshot).toFixed(2)}</span>
+                  <div className="border-t border-white/10 pt-4 bg-slate-900/50 p-3 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      {isGrouped ? (
+                        <>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Canchas ({groupedBooking.slots.length})</span>
+                            <span className="font-semibold text-sm">
+                              ${groupedBooking.slots.reduce((sum, s) => sum + parseFloat(s.basePriceSnapshot), 0).toFixed(2)}
+                            </span>
+                          </div>
+                          {Number(groupedBooking.surchargeSnapshot) > 0 && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Recargos</span>
+                              <span className="font-semibold text-sm text-orange-400">
+                                ${Number(groupedBooking.surchargeSnapshot).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                          {groupedBooking.withInstructor && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Instructores</span>
+                              <span className="font-semibold text-sm text-emerald-400">
+                                ${Number(groupedBooking.instructorPriceSnapshot).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Cancha</span>
+                            <span className="font-semibold text-sm">${Number(groupedBooking.basePriceSnapshot).toFixed(2)}</span>
+                          </div>
+                          {Number(groupedBooking.surchargeSnapshot) > 0 && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Recargo</span>
+                              <span className="font-semibold text-sm text-orange-400">${Number(groupedBooking.surchargeSnapshot).toFixed(2)}</span>
+                            </div>
+                          )}
+                          {groupedBooking.withInstructor && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Instructor</span>
+                              <span className="font-semibold text-sm text-emerald-400">${Number(groupedBooking.instructorPriceSnapshot).toFixed(2)}</span>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
-                    {Number(booking.surchargeSnapshot) > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Recargo:</span>
-                        <span>${Number(booking.surchargeSnapshot).toFixed(2)}</span>
-                      </div>
-                    )}
-                    {booking.withInstructor && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Instructor:</span>
-                        <span>${Number(booking.instructorPriceSnapshot).toFixed(2)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-lg font-bold border-t border-white/10 pt-2">
-                      <span>Total:</span>
-                      <span className="text-cyan-400">
-                        ${Number(booking.totalPrice).toFixed(2)} {booking.currency}
+                    <div className="flex justify-between items-center border-t border-white/10 pt-3">
+                      <span className="text-sm text-slate-300">Total:</span>
+                      <span className="text-2xl font-bold text-cyan-400">
+                        ${Number(groupedBooking.totalPrice).toFixed(2)}
                       </span>
                     </div>
                   </div>
 
-                  {booking.status !== "cancelled" && booking.status !== "completed" && (
+                  {groupedBooking.status !== "cancelled" && groupedBooking.status !== "completed" && (
                     <Button
-                      onClick={() => handleCancel(booking.id)}
-                      disabled={cancellingId === booking.id}
+                      onClick={() => handleCancel(groupedBooking)}
+                      disabled={cancellingId === groupedBooking.id}
                       className="w-full bg-red-500 hover:bg-red-600"
                     >
-                      {cancellingId === booking.id ? "Cancelando..." : "Cancelar Reserva"}
+                      {cancellingId === groupedBooking.id ? "Cancelando..." : "Cancelar Reserva"}
                     </Button>
                   )}
 
                   <p className="text-xs text-slate-500 text-center">
-                    Reservado el {new Date(booking.createdAt).toLocaleDateString("es-ES")}
+                    Reservado el {new Date(groupedBooking.createdAt).toLocaleDateString("es-ES")}
                   </p>
                 </div>
               </div>

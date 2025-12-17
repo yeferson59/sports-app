@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getInstructorScheduleWithBookings } from "./action";
-import Image from "next/image";
 import { InstructorHeader } from "@/components/instructor-header";
 
 interface Schedule {
@@ -41,10 +40,22 @@ const DAY_NAMES: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "Pendiente", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50" },
-  confirmed: { label: "Confirmada", color: "bg-green-500/20 text-green-400 border-green-500/50" },
-  cancelled: { label: "Cancelada", color: "bg-red-500/20 text-red-400 border-red-500/50" },
-  completed: { label: "Completada", color: "bg-blue-500/20 text-blue-400 border-blue-500/50" },
+  pending: {
+    label: "Pendiente",
+    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50",
+  },
+  confirmed: {
+    label: "Confirmada",
+    color: "bg-green-500/20 text-green-400 border-green-500/50",
+  },
+  cancelled: {
+    label: "Cancelada",
+    color: "bg-red-500/20 text-red-400 border-red-500/50",
+  },
+  completed: {
+    label: "Completada",
+    color: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+  },
 };
 
 const formatTime = (date: Date | string | null | undefined): string => {
@@ -105,7 +116,9 @@ export default function ObtenerHorariosInstructor() {
         {/* Header */}
         <header className="mb-10">
           <h1 className="text-4xl font-bold">Mis Horarios</h1>
-          <p className="mt-2 text-slate-300 text-lg">Visualiza los horarios con reservas asignadas</p>
+          <p className="mt-2 text-slate-300 text-lg">
+            Visualiza los horarios con reservas asignadas
+          </p>
         </header>
 
         {/* Mensajes */}
@@ -118,8 +131,12 @@ export default function ObtenerHorariosInstructor() {
         {/* Lista de horarios */}
         {schedule.length === 0 ? (
           <div className="bg-slate-800/40 rounded-2xl border border-white/10 p-12 text-center">
-            <p className="text-xl text-slate-400">No tienes horarios con reservas</p>
-            <p className="text-sm text-slate-500 mt-2">Cuando se asigne una reserva con instructor, aparecerá aquí</p>
+            <p className="text-xl text-slate-400">
+              No tienes horarios con reservas
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Cuando se asigne una reserva con instructor, aparecerá aquí
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -129,19 +146,24 @@ export default function ObtenerHorariosInstructor() {
                 className="bg-slate-800/40 rounded-xl border border-white/10 shadow-xl backdrop-blur-sm overflow-hidden"
               >
                 {/* Header del horario */}
-                <div className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-b border-white/10 p-6">
+                <div className="bg-linear-to-r from-emerald-500/20 to-cyan-500/20 border-b border-white/10 p-6">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-2xl font-bold text-emerald-400">
-                        {DAY_NAMES[(slot.dayOfWeek as string) || ""] || slot.dayOfWeek || "N/A"}
+                        {DAY_NAMES[(slot.dayOfWeek as string) || ""] ||
+                          slot.dayOfWeek ||
+                          "N/A"}
                       </h3>
                       <p className="text-slate-400 mt-1">
-                        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                        {formatTime(slot.startTime)} -{" "}
+                        {formatTime(slot.endTime)}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-slate-400">Reservas</p>
-                      <p className="text-3xl font-bold text-cyan-400">{slot.bookings.length}</p>
+                      <p className="text-3xl font-bold text-cyan-400">
+                        {slot.bookings.length}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -150,7 +172,8 @@ export default function ObtenerHorariosInstructor() {
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {slot.bookings.map((b) => {
-                      const statusInfo = STATUS_LABELS[b.status] || STATUS_LABELS.pending;
+                      const statusInfo =
+                        STATUS_LABELS[b.status] || STATUS_LABELS.pending;
 
                       return (
                         <div
@@ -159,14 +182,18 @@ export default function ObtenerHorariosInstructor() {
                         >
                           <div>
                             <p className="text-sm text-slate-400">Cancha</p>
-                            <p className="font-semibold text-white">{b.field_name || "N/A"}</p>
+                            <p className="font-semibold text-white">
+                              {b.field_name || "N/A"}
+                            </p>
                             <p className="text-xs text-slate-500 capitalize">
                               {b.field_type?.replace("-", " ")}
                             </p>
                           </div>
 
                           <div className="pt-2 border-t border-white/10">
-                            <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusInfo.color}`}>
+                            <span
+                              className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusInfo.color}`}
+                            >
                               {statusInfo.label}
                             </span>
                           </div>
@@ -174,12 +201,14 @@ export default function ObtenerHorariosInstructor() {
                           <div className="text-sm">
                             <p className="text-slate-400">Tu Pago:</p>
                             <p className="font-bold text-emerald-400">
-                              ${Number(b.instructorPriceSnapshot).toFixed(2)} {b.currency}
+                              ${Number(b.instructorPriceSnapshot).toFixed(2)}{" "}
+                              {b.currency}
                             </p>
                           </div>
 
                           <p className="text-xs text-slate-500 pt-2 border-t border-white/10">
-                            Reservado: {new Date(b.createdAt).toLocaleDateString("es-ES")}
+                            Reservado:{" "}
+                            {new Date(b.createdAt).toLocaleDateString("es-ES")}
                           </p>
                         </div>
                       );
