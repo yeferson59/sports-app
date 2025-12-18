@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AdminHeader } from "@/components/admin-header";
 import { useState } from "react";
@@ -144,16 +143,6 @@ export default function RegisterInstructorPage() {
                 placeholder="3201754332"
                 className="mt-2"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="sport" required>
-                Disciplina
-              </Label>
-              <Select id="sport" name="sport" required className="mt-2">
-                <option value="">Selecciona una disciplina</option>
-                <option value="padel">Pádel</option>
-              </Select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
